@@ -1,0 +1,76 @@
+extends layout
+
+block content
+  .page-wrapper
+    .signin-container
+      .signin-left-panel
+        .branding
+          img.brand-logo(src="/images/logo.png" alt="App Logo")
+          h2.brand-name Your App
+        .welcome-text
+          h1 Welcome Back
+          p Sign in to access your account and continue your journey with us.
+          .feature-list
+            .feature-item
+              .feature-icon ✓
+              .feature-text Secure Authentication
+            .feature-item
+              .feature-icon ✓
+              .feature-text Fast & Reliable
+            .feature-item
+              .feature-icon ✓
+              .feature-text Cross-Device Access
+      
+      .signin-card
+        .signin-header
+          h1.signin-title Sign In
+          p.signin-subtitle Enter your credentials to continue
+        
+        #error-message.error-message.hidden
+        
+        form#signin-form
+          .form-group
+            label(for="email") Email Address
+            .input-container
+              span.input-icon 📧
+              input#email(type="email" placeholder="your@email.com" required)
+          
+          .form-group
+            label(for="password") Password
+            .input-container
+              span.input-icon 🔒
+              input#password(type="password" placeholder="••••••••" required)
+              button.toggle-password(type="button" tabindex="-1") 👁️
+          
+          .form-options
+            .remember-me
+              input#remember(type="checkbox")
+              label(for="remember") Remember me
+            
+            a.forgot-password(href="/reset-password") Forgot password?
+          
+          button#signin-button.primary-button(type="submit")
+            span.button-text Sign In
+            span#loading-spinner.spinner.hidden ◌
+        
+        .divider
+          span.divider-text or
+        
+        .social-signin
+          button.social-button.google-button(type="button")
+            span.social-icon G
+            span Continue with Google
+          
+          button.social-button.github-button(type="button")
+            span.social-icon #
+            span Continue with GitHub
+        
+        .signup-link
+          p
+            | Don't have an account? 
+            a(href="/signup") Sign Up
+
+block scripts
+  script(src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js")
+  script(src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js")
+  script(src="/javascripts/signin.js")
