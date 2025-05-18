@@ -1,7 +1,7 @@
 /* CSS for sign-in page */
 :root {
-  --primary-color: #4361ee;
-  --primary-hover: #3a56d4;
+  --primary-color: #000000;
+  --primary-hover: #002fff;
   --secondary-color: #3a0ca3;
   --text-dark: #2b2d42;
   --text-light: #8d99ae;
@@ -240,7 +240,7 @@ body {
 
 .primary-button {
   width: 100%;
-  background-color: var(--primary-color);
+  background-color: var(--primary-hover);
   color: var(--text-white);
   font-size: 16px;
   font-weight: 600;

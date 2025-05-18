@@ -266,54 +266,124 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   // Google Sign Up
-  if (googleButton) {
-    console.log("Google button found");
-    googleButton.addEventListener('click', async () => {
-      console.log("Google button clicked");
-      try {
-        if (errorMessage) errorMessage.classList.add('hidden');
+  // Enhanced Google signup with improved Firestore storage
+// Replace the Google button event listener in your signup.js file
+
+if (googleButton) {
+  console.log("Google button found");
+  googleButton.addEventListener('click', async () => {
+    console.log("Google button clicked");
+    
+    try {
+      // Show loading state
+      if (signupButton) signupButton.disabled = true;
+      if (loadingSpinner) loadingSpinner.classList.remove('hidden');
+      if (errorMessage) errorMessage.classList.add('hidden');
+      if (successMessage) successMessage.classList.add('hidden');
+      
+      // Create Google auth provider
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({
+        // Force account selection even if one account is available
+        prompt: 'select_account'
+      });
+      console.log("Google provider created with forced selection");
+      
+      // Use signInWithPopup to show the Google login popup
+      const userCredential = await auth.signInWithPopup(provider);
+      console.log("Google sign-in complete");
+      
+      // Extract user and additional info
+      const user = userCredential.user;
+      const isNewUser = userCredential.additionalUserInfo?.isNewUser;
+      const profile = userCredential.additionalUserInfo?.profile;
+      
+      console.log("User signed in with Google:", user.uid);
+      console.log("Is new user:", isNewUser);
+      
+      // Always ensure user data exists in Firestore
+      if (db) {
+        // Check if Firestore is properly initialized
+        console.log("Checking Firestore:", !!db);
         
-        const provider = new firebase.auth.GoogleAuthProvider();
-        console.log("Google provider created");
-        
-        const result = await auth.signInWithPopup(provider);
-        console.log("Google sign-in popup completed");
-        
-        const user = result.user;
-        
-        // Check if the user is new
-        if (result.additionalUserInfo && result.additionalUserInfo.isNewUser) {
-          console.log("New user via Google");
-          // Save user data to Firestore for Google sign-up
-          if (db) {
-            await saveUserToFirestore(user, user.displayName);
+        try {
+          // First check if the document exists
+          const userDocRef = db.collection('users').doc(user.uid);
+          const docSnapshot = await userDocRef.get();
+          
+          if (!docSnapshot.exists) {
+            console.log("No existing user record found, creating new one");
+            
+            // Create user data object with all required fields
+            const userData = {
+              fullName: user.displayName || '',
+              email: user.email,
+              balance: "$0.00",
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+              lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+              provider: 'google',
+              photoURL: user.photoURL || null,
+              emailVerified: true // Google auth automatically verifies email
+            };
+            
+            console.log("Saving user data:", userData);
+            
+            // Set the document with merge option to avoid overwriting existing data
+            await userDocRef.set(userData, { merge: true });
+            console.log("Successfully saved user data to Firestore");
+            
+            // Show success message
+            if (successMessage) {
+              successMessage.textContent = 'Account created successfully with Google!';
+              successMessage.classList.remove('hidden');
+            }
           } else {
-            console.warn("Firestore not initialized, skipping user data save");
+            console.log("Existing user found, updating last login");
+            // Update last login timestamp for existing users
+            await userDocRef.update({
+              lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+            });
           }
-          
-          if (successMessage) {
-            successMessage.textContent = 'Account created successfully with Google!';
-            successMessage.classList.remove('hidden');
-          }
-          
-          // Redirect to dashboard after a delay
-          setTimeout(() => {
-            window.location.href = '/dashboard';
-          }, 2000);
-        } else {
-          console.log("Existing user via Google");
-          // Existing user, redirect to dashboard
-          window.location.href = '/dashboard';
+        } catch (firestoreError) {
+          // Log the detailed error but continue with authentication
+          console.error("Firestore operation failed:", firestoreError);
+          console.error("Error code:", firestoreError.code);
+          console.error("Error message:", firestoreError.message);
         }
-      } catch (error) {
-        console.error("Google sign-in error:", error);
-        if (errorMessage) {
-          errorMessage.textContent = getErrorMessage(error);
-          errorMessage.classList.remove('hidden');
-        }
+      } else {
+        console.error("Firestore not initialized properly!");
       }
-    });
-  }
+      
+      // Get ID token for server-side authentication
+      const idToken = await user.getIdToken();
+      console.log("Got ID token, length:", idToken.length);
+      
+      // Store token in cookie with secure settings
+      document.cookie = `firebaseToken=${idToken}; path=/; max-age=3600; SameSite=Strict`;
+      console.log("Authentication cookie set");
+      
+      // Redirect to dashboard
+      console.log("Redirecting to dashboard...");
+      window.location.href = '/dashboard';
+      
+    } catch (error) {
+      console.error("Google sign-in error:", error);
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
+      
+      // Show error message to user
+      if (errorMessage) {
+        errorMessage.textContent = getErrorMessage(error);
+        errorMessage.classList.remove('hidden');
+      }
+      
+      // Reset loading state
+      if (signupButton) signupButton.disabled = false;
+      if (loadingSpinner) loadingSpinner.classList.add('hidden');
+    }
+  });
+}
+
   
   // Validate password against requirements
   function validatePassword(password) {

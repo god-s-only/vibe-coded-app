@@ -18,12 +18,46 @@ router.get('/', function(req, res, next) {
     .then((decodedToken) => {
       const uid = decodedToken.uid;
       const emailVerified = decodedToken.email_verified;
+      const provider = decodedToken.firebase.sign_in_provider;
       
-      console.log(`User authenticated: ${uid}, Email verified: ${emailVerified}`);
+      console.log(`User authenticated: ${uid}, Email verified: ${emailVerified}, Provider: ${provider}`);
       
-      // If email is verified, redirect to dashboard
-      if (emailVerified) {
-        return res.redirect('/dashboard');
+      // Google and GitHub sign-ins are considered verified automatically
+      const isOAuthProvider = provider === 'google.com' || provider === 'github.com';
+      
+      // If email is verified or it's an OAuth provider, redirect to dashboard
+      if (emailVerified || isOAuthProvider) {
+        // Check if user data exists in Firestore
+        const db = admin.firestore();
+        db.collection('users').doc(uid).get()
+          .then((docSnapshot) => {
+            if (!docSnapshot.exists && isOAuthProvider) {
+              // If OAuth user but no Firestore record, we need to create one
+              console.log(`Creating Firestore record for OAuth user: ${uid}`);
+              
+              // Get additional user information from Auth
+              return admin.auth().getUser(uid)
+                .then((userRecord) => {
+                  // Save user data to Firestore
+                  return db.collection('users').doc(uid).set({
+                    fullName: userRecord.displayName || '',
+                    email: userRecord.email,
+                    balance: "$0.00",
+                    createdAt: admin.firestore.FieldValue.serverTimestamp()
+                  }).then(() => {
+                    console.log(`Created Firestore record for OAuth user: ${uid}`);
+                    return res.redirect('/dashboard');
+                  });
+                });
+            } else {
+              // User data exists or it's not an OAuth provider
+              return res.redirect('/dashboard');
+            }
+          })
+          .catch((error) => {
+            console.error('Error checking/creating user data:', error);
+            return res.redirect('/dashboard');
+          });
       } else {
         // If email is not verified, redirect to signin
         // The frontend signin page will handle showing verification message
