@@ -1,4 +1,4 @@
-/* CSS for sign-in page */
+/* CSS for sign-up page */
 :root {
   --primary-color: #4361ee;
   --primary-hover: #3a56d4;
@@ -151,6 +151,16 @@ body {
   border-left: 4px solid var(--error-color);
 }
 
+.success-message {
+  padding: 12px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: var(--success-color);
+  background-color: rgba(76, 175, 80, 0.1);
+  border-radius: var(--input-radius);
+  border-left: 4px solid var(--success-color);
+}
+
 .hidden {
   display: none;
 }
@@ -205,36 +215,74 @@ body {
   font-size: 16px;
 }
 
-.form-options {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* Password requirements */
+.password-requirements {
   margin-bottom: 24px;
-}
-
-.remember-me {
-  display: flex;
-  align-items: center;
-}
-
-.remember-me input {
-  margin-right: 8px;
-}
-
-.remember-me label {
   font-size: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--input-radius);
+  padding: 12px;
+  background-color: var(--background-light);
+}
+
+.requirements-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-dark);
+}
+
+.requirements-list {
+  list-style-type: none;
+  padding-left: 8px;
+}
+
+.requirements-list li {
+  position: relative;
+  padding-left: 24px;
+  margin-bottom: 4px;
   color: var(--text-light);
 }
 
-.forgot-password {
-  font-size: 14px;
-  color: var(--primary-color);
-  text-decoration: none;
-  transition: color var(--transition-speed);
+.requirements-list li::before {
+  content: "○";
+  position: absolute;
+  left: 0;
+  color: var(--text-light);
 }
 
-.forgot-password:hover {
-  color: var(--primary-hover);
+.requirements-list li.requirement-met {
+  color: var(--success-color);
+}
+
+.requirements-list li.requirement-met::before {
+  content: "✓";
+  color: var(--success-color);
+}
+
+/* Form agreement */
+.form-agreement {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.form-agreement input {
+  margin-top: 4px;
+  margin-right: 8px;
+}
+
+.form-agreement label {
+  font-size: 14px;
+  color: var(--text-light);
+  line-height: 1.4;
+}
+
+.form-agreement a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.form-agreement a:hover {
   text-decoration: underline;
 }
 
@@ -409,62 +457,7 @@ body {
 }
 
 @media (max-width: 480px) {
-  .form-options {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-  
   .signin-card {
     padding: 16px;
   }
-}
-/* Required CSS for Email Verification Messages */
-.error-message {
-  display: block;
-  background-color: #fee2e2;
-  color: #b91c1c;
-  padding: 12px;
-  border-radius: 6px;
-  margin-bottom: 16px;
-  font-size: 14px;
-  border-left: 4px solid #ef4444;
-}
-
-.warning-message {
-  display: block;
-  background-color: #fef3c7;
-  color: #92400e;
-  padding: 12px;
-  border-radius: 6px;
-  margin-bottom: 16px;
-  font-size: 14px;
-  border-left: 4px solid #f59e0b;
-}
-
-.success-message {
-  display: block;
-  background-color: #dcfce7;
-  color: #166534;
-  padding: 12px;
-  border-radius: 6px;
-  margin-bottom: 16px;
-  font-size: 14px;
-  border-left: 4px solid #22c55e;
-}
-
-.verification-link {
-  display: inline-block;
-  margin-top: 10px;
-  color: #4a6cf7;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.verification-link:hover {
-  color: #3651d4;
-}
-
-.hidden {
-  display: none !important;
 }

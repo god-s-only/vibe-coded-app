@@ -1,0 +1,98 @@
+extends layout
+
+block content
+  .page-wrapper
+    .signin-container
+      .signin-left-panel
+        .branding
+          img.brand-logo(src="/images/logo.png" alt="App Logo")
+          h2.brand-name Tornado
+        .welcome-text
+          h1 Create an Account
+          p Join our community and get access to all features and benefits.
+          .feature-list
+            .feature-item
+              .feature-icon ✓
+              .feature-text Secure Authentication
+            .feature-item
+              .feature-icon ✓
+              .feature-text Fast & Reliable
+            .feature-item
+              .feature-icon ✓
+              .feature-text Cross-Device Access
+      
+      .signin-card
+        .signin-header
+          h1.signin-title Sign Up
+          p.signin-subtitle Create your account to get started
+        
+        #error-message.error-message.hidden
+        #success-message.success-message.hidden
+        
+        form#signup-form
+          .form-group
+            label(for="name") Full Name
+            .input-container
+              span.input-icon 👤
+              input#name(type="text" placeholder="John Doe" required)
+          
+          .form-group
+            label(for="email") Email Address
+            .input-container
+              span.input-icon 📧
+              input#email(type="email" placeholder="your@email.com" required)
+          
+          .form-group
+            label(for="password") Password
+            .input-container
+              span.input-icon 🔒
+              input#password(type="password" placeholder="••••••••" required)
+              button.toggle-password(type="button" tabindex="-1") 👁️
+          
+          .form-group
+            label(for="confirm-password") Confirm Password
+            .input-container
+              span.input-icon 🔒
+              input#confirm-password(type="password" placeholder="••••••••" required)
+          
+          .password-requirements
+            p.requirements-title Password Requirements:
+            ul.requirements-list
+              li#min-length-req At least 8 characters
+              li#uppercase-req At least one uppercase letter
+              li#lowercase-req At least one lowercase letter
+              li#number-req At least one number
+              li#special-req At least one special character
+          
+          .form-agreement
+            input#terms(type="checkbox" required)
+            label(for="terms") 
+              | I agree to the 
+              a(href="/terms") Terms of Service
+              |  and 
+              a(href="/privacy") Privacy Policy
+          
+          button#signup-button.primary-button(type="submit")
+            span.button-text Create Account
+            span#loading-spinner.spinner.hidden ◌
+        
+        .divider
+          span.divider-text or
+        
+        .social-signin
+          button.social-button.google-button(type="button")
+            span.social-icon G
+            span Sign up with Google
+          
+          
+        
+        .signup-link
+          p
+            | Already have an account? 
+            a(href="/signin") Sign In
+
+block scripts
+  script(src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js")
+  script(src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js")
+  script(src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js")
+  script(src="/javascripts/signup.js")
