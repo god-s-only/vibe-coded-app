@@ -21,12 +21,11 @@ try {
 };
 
   
-  admin.initializeApp({
+admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: "https://fir-demo-app-f3342-default-rtdb.firebaseio.com"
   });
 } catch (error) {
-  // App might already be initialized
   console.log('Firebase admin initialization error:', error.message);
 }
 

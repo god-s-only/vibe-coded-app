@@ -1,0 +1,144 @@
+extends layout
+
+block content
+  .dashboard-container
+    // Header Section
+    header.dashboard-header
+      .container
+        .header-content
+          .user-info
+            .avatar-container
+              img#user-avatar.user-avatar(src="/images/default-avatar.png" alt="User Avatar")
+              .status-indicator.online
+            .user-details
+              h1#user-name.user-name Welcome back
+              p#user-email.user-email Loading...
+          .header-actions
+            button.btn.btn-secondary#logout-btn
+              i.icon.icon-logout
+              span Logout
+    
+    // Main Dashboard Content
+    main.dashboard-main
+      .container
+        // Balance Card
+        .balance-section
+          .balance-card
+            .balance-header
+              .balance-title
+                i.icon.icon-wallet
+                span Account Balance
+              .balance-controls
+                button.toggle-btn#balance-toggle(title="Toggle Balance Visibility")
+                  i.icon.icon-eye
+                  span.sr-only Toggle Balance
+            .balance-content
+              .balance-display
+                span.currency-symbol $
+                span#balance-amount.balance-amount(data-balance="0.00") ••••••
+              .balance-actions
+                button.btn.btn-primary.withdraw-btn#withdraw-btn
+                  i.icon.icon-download
+                  span Withdraw
+                button.btn.btn-outline.deposit-btn#deposit-btn
+                  i.icon.icon-upload
+                  span Deposit
+        
+        // Quick Actions Section
+        .quick-actions
+          h2.section-title Quick Actions
+          .actions-grid
+            .action-card
+              .action-icon
+                i.icon.icon-history
+              .action-content
+                h3 Transaction History
+                p View all your transactions
+              .action-arrow
+                i.icon.icon-chevron-right
+            
+            .action-card
+              .action-icon
+                i.icon.icon-settings
+              .action-content
+                h3 Account Settings
+                p Manage your profile
+              .action-arrow
+                i.icon.icon-chevron-right
+            
+            .action-card
+              .action-icon
+                i.icon.icon-help
+              .action-content
+                h3 Support
+                p Get help and support
+              .action-arrow
+                i.icon.icon-chevron-right
+        
+        // Recent Activity
+        .recent-activity
+          h2.section-title Recent Activity
+          .activity-list
+            .activity-item
+              .activity-icon.success
+                i.icon.icon-check
+              .activity-content
+                .activity-title Deposit Successful
+                .activity-description $250.00 added to your account
+                .activity-time 2 hours ago
+              .activity-amount +$250.00
+            
+            .activity-item
+              .activity-icon.pending
+                i.icon.icon-clock
+              .activity-content
+                .activity-title Withdrawal Pending
+                .activity-description Processing your request
+                .activity-time 1 day ago
+              .activity-amount -$100.00
+            
+            .activity-item
+              .activity-icon.info
+                i.icon.icon-info
+              .activity-content
+                .activity-title Account Verified
+                .activity-description Your account has been verified
+                .activity-time 3 days ago
+    
+    // Loading Overlay
+    .loading-overlay#loading-overlay
+      .loading-spinner
+        .spinner
+      .loading-text Loading your dashboard...
+    
+    // Withdraw Modal
+    .modal-overlay#withdraw-modal
+      .modal
+        .modal-header
+          h3 Withdraw Funds
+          button.modal-close#modal-close
+            i.icon.icon-x
+        .modal-content
+          form#withdraw-form
+            .form-group
+              label(for="withdraw-amount") Amount
+              .input-wrapper
+                span.currency-symbol $
+                input#withdraw-amount.form-input(type="number" placeholder="0.00" min="1" step="0.01" required)
+            .form-group
+              label(for="withdraw-method") Withdrawal Method
+              select#withdraw-method.form-select(required)
+                option(value="") Select method
+                option(value="bank") Bank Transfer
+                option(value="paypal") PayPal
+                option(value="crypto") Cryptocurrency
+            .form-actions
+              button.btn.btn-secondary(type="button" data-dismiss="modal") Cancel
+              button.btn.btn-primary(type="submit") Confirm Withdrawal
+
+block scripts
+  // Firebase Client SDK - IMPORTANT: Include Firestore!
+  script(src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js")
+  script(src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js")
+  script(src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js")
+  script(src="/javascripts/dashboard.js")
