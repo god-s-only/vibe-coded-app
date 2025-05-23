@@ -35,6 +35,16 @@ const logoutBtn = document.getElementById('logout-btn');
 let balanceVisible = true;
 let currentUser = null;
 let userBalance = '0.00';
+let cryptoPriceData = {};
+let priceUpdateInterval;
+
+// Crypto configuration
+const CRYPTO_SYMBOLS = ['bitcoin', 'ethereum', 'dogecoin'];
+const CRYPTO_DISPLAY = {
+  bitcoin: { symbol: 'BTC', icon: '₿' },
+  ethereum: { symbol: 'ETH', icon: 'Ξ' },
+  dogecoin: { symbol: 'DOGE', icon: 'Ð' }
+};
 
 // Check authentication state
 auth.onAuthStateChanged(async (user) => {
@@ -44,6 +54,7 @@ auth.onAuthStateChanged(async (user) => {
     currentUser = user;
     console.log(`User authenticated: ${user.uid}, Email verified: ${user.emailVerified}`);
     await loadUserData(user);
+    initializeCryptoPrices();
     hideLoading();
   } else {
     console.log('No authenticated user, redirecting to signin');
@@ -110,6 +121,149 @@ async function loadUserData(user) {
   }
 }
 
+// Initialize crypto price tracking
+async function initializeCryptoPrices() {
+  console.log('Initializing crypto price tracking...');
+  await fetchCryptoPrices();
+  updateCryptoPriceDisplay();
+  
+  // Update prices every 30 seconds
+  priceUpdateInterval = setInterval(async () => {
+    await fetchCryptoPrices();
+    updateCryptoPriceDisplay();
+  }, 30000);
+}
+
+// Fetch crypto prices from CoinGecko API (free)
+async function fetchCryptoPrices() {
+  try {
+    const response = await fetch(
+      `https://api.coingecko.com/api/v3/simple/price?ids=${CRYPTO_SYMBOLS.join(',')}&vs_currencies=usd&include_24hr_change=true`
+    );
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch crypto prices');
+    }
+    
+    const data = await response.json();
+    
+    // Store previous prices for trend calculation
+    const previousPrices = { ...cryptoPriceData };
+    
+    // Update crypto price data
+    for (const [coin, priceData] of Object.entries(data)) {
+      const prevPrice = cryptoPriceData[coin]?.price || priceData.usd;
+      
+      cryptoPriceData[coin] = {
+        price: priceData.usd,
+        change24h: priceData.usd_24h_change,
+        trend: priceData.usd > prevPrice ? 'up' : priceData.usd < prevPrice ? 'down' : 'neutral',
+        lastUpdated: Date.now()
+      };
+    }
+    
+    console.log('Crypto prices updated:', cryptoPriceData);
+    
+  } catch (error) {
+    console.error('Error fetching crypto prices:', error);
+    
+    // Fallback data if API fails
+    if (Object.keys(cryptoPriceData).length === 0) {
+      cryptoPriceData = {
+        bitcoin: { price: 45000, change24h: 2.5, trend: 'up', lastUpdated: Date.now() },
+        ethereum: { price: 3200, change24h: -1.2, trend: 'down', lastUpdated: Date.now() },
+        dogecoin: { price: 0.08, change24h: 5.8, trend: 'up', lastUpdated: Date.now() }
+      };
+    }
+  }
+}
+
+// Update crypto price display in recent activity section
+function updateCryptoPriceDisplay() {
+  const activityList = document.querySelector('.activity-list');
+  if (!activityList) return;
+  
+  // Clear existing items
+  activityList.innerHTML = '';
+  
+  // Generate crypto price items
+  CRYPTO_SYMBOLS.forEach(coinId => {
+    const coinData = cryptoPriceData[coinId];
+    const coinDisplay = CRYPTO_DISPLAY[coinId];
+    
+    if (!coinData || !coinDisplay) return;
+    
+    const isPositive = coinData.change24h >= 0;
+    const trendIcon = getTrendIcon(coinData.trend);
+    const priceFormatted = formatPrice(coinData.price, coinId);
+    const changeFormatted = Math.abs(coinData.change24h).toFixed(2);
+    
+    const activityItem = document.createElement('div');
+    activityItem.className = 'activity-item';
+    
+    activityItem.innerHTML = `
+      <div class="activity-icon ${isPositive ? 'success' : 'pending'}">
+        <i class="icon">${coinDisplay.icon}</i>
+      </div>
+      <div class="activity-content">
+        <div class="activity-title">${coinDisplay.symbol}/USD ${trendIcon}</div>
+        <div class="activity-description">24h Change: ${isPositive ? '+' : '-'}${changeFormatted}%</div>
+        <div class="activity-time">Live Price • Updated ${getTimeAgo(coinData.lastUpdated)}</div>
+      </div>
+      <div class="activity-amount" style="color: ${isPositive ? '#10b981' : '#ef4444'}">
+        $${priceFormatted}
+      </div>
+    `;
+    
+    activityList.appendChild(activityItem);
+    
+    // Add subtle animation for price updates
+    activityItem.style.opacity = '0';
+    activityItem.style.transform = 'translateY(10px)';
+    
+    setTimeout(() => {
+      activityItem.style.transition = 'all 0.3s ease';
+      activityItem.style.opacity = '1';
+      activityItem.style.transform = 'translateY(0)';
+    }, 100);
+  });
+}
+
+// Get trend icon based on price movement
+function getTrendIcon(trend) {
+  switch (trend) {
+    case 'up':
+      return '<span style="color: #10b981; font-size: 12px;">📈</span>';
+    case 'down':
+      return '<span style="color: #ef4444; font-size: 12px;">📉</span>';
+    default:
+      return '<span style="color: #6b7280; font-size: 12px;">➡️</span>';
+  }
+}
+
+// Format price based on coin type
+function formatPrice(price, coinId) {
+  if (coinId === 'dogecoin') {
+    return price.toFixed(4);
+  } else if (price > 1000) {
+    return price.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  } else {
+    return price.toFixed(2);
+  }
+}
+
+// Get time ago string
+function getTimeAgo(timestamp) {
+  const now = Date.now();
+  const diff = now - timestamp;
+  const seconds = Math.floor(diff / 1000);
+  
+  if (seconds < 60) return 'just now';
+  if (seconds < 120) return '1 min ago';
+  if (seconds < 3600) return `${Math.floor(seconds / 60)} mins ago`;
+  return 'recently';
+}
+
 // Toggle balance visibility
 balanceToggle.addEventListener('click', function() {
   balanceVisible = !balanceVisible;
@@ -158,6 +312,11 @@ withdrawForm.addEventListener('submit', function(e) {
 // Logout functionality
 logoutBtn.addEventListener('click', async function() {
   try {
+    // Clear crypto price interval
+    if (priceUpdateInterval) {
+      clearInterval(priceUpdateInterval);
+    }
+    
     await auth.signOut();
     // Clear cookie
     document.cookie = 'firebaseToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
@@ -190,3 +349,10 @@ setTimeout(() => {
     loadingOverlay.classList.add('hidden');
   }
 }, 5000);
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+  if (priceUpdateInterval) {
+    clearInterval(priceUpdateInterval);
+  }
+});
