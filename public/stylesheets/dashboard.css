@@ -630,3 +630,562 @@
     .hidden {
       display: none !important;
     }
+/* Payment Modal Styles */
+.payment-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.payment-modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.payment-modal {
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: scale(0.9) translateY(20px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.payment-modal-overlay.active .payment-modal {
+  transform: scale(1) translateY(0);
+}
+
+/* Modal Header */
+.payment-modal-header {
+  padding: 32px 32px 24px 32px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.payment-header-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1;
+}
+
+.payment-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.payment-title-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.payment-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.payment-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+  font-weight: 500;
+}
+
+.payment-modal-close {
+  background: #f8fafc;
+  border: none;
+  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.payment-modal-close:hover {
+  background: #e2e8f0;
+  color: #374151;
+}
+
+/* Modal Content */
+.payment-modal-content {
+  padding: 0 32px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Scam Amount Section */
+.scam-amount-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.scam-amount-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.label-description {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.scam-amount-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.currency-symbol {
+  position: absolute;
+  left: 16px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+  z-index: 1;
+}
+
+.scam-amount-input {
+  width: 100%;
+  padding: 16px 16px 16px 40px;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+}
+
+.scam-amount-input:focus {
+  outline: none;
+  border-color: #667eea;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+/* Payment Message Section */
+.payment-message-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.alert-box {
+  background: linear-gradient(135deg, #fef3c7 0%, #fbbf24 100%);
+  border: 1px solid #f59e0b;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.alert-icon {
+  width: 24px;
+  height: 24px;
+  color: #d97706;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.alert-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.alert-message {
+  font-size: 16px;
+  color: #92400e;
+  margin: 0;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.alert-amount {
+  font-size: 24px;
+  font-weight: 700;
+  color: #92400e;
+  margin: 0;
+}
+
+/* Payment Details Section */
+.payment-details-section {
+  background: #f8fafc;
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.payment-method-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.bitcoin-icon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-method-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.payment-method-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* QR Code Section */
+.qr-code-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.qr-code-container {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 2px solid #e2e8f0;
+}
+
+.qr-code-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 8px;
+  display: block;
+}
+
+/* Wallet Address Section */
+.wallet-address-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wallet-address-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.wallet-address-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wallet-address-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: 'Courier New', monospace;
+  color: #374151;
+  background: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.wallet-address-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.copy-address-btn {
+  padding: 12px;
+  background: #667eea;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copy-address-btn:hover {
+  background: #5a67d8;
+  transform: translateY(-1px);
+}
+
+/* Payment Actions */
+.payment-actions {
+  display: flex;
+  justify-content: center;
+  padding-top: 8px;
+}
+
+.payment-complete-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  border-radius: 16px;
+  padding: 16px 32px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 200px;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.payment-complete-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.payment-complete-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.button-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-spinner {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .payment-modal {
+    margin: 16px;
+    width: calc(100% - 32px);
+    border-radius: 20px;
+  }
+  
+  .payment-modal-header {
+    padding: 24px 24px 20px 24px;
+  }
+  
+  .payment-modal-content {
+    padding: 0 24px 24px 24px;
+    gap: 24px;
+  }
+  
+  .payment-title {
+    font-size: 20px;
+  }
+  
+  .payment-details-section {
+    padding: 20px;
+  }
+  
+  .qr-code-image {
+    width: 160px;
+    height: 160px;
+  }
+  
+  .wallet-address-input {
+    font-size: 12px;
+  }
+  
+  .payment-complete-btn {
+    padding: 14px 24px;
+    font-size: 15px;
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-modal-header {
+    padding: 20px 20px 16px 20px;
+  }
+  
+  .payment-modal-content {
+    padding: 0 20px 20px 20px;
+    gap: 20px;
+  }
+  
+  .payment-header-content {
+    gap: 12px;
+  }
+  
+  .payment-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+  
+  .payment-title {
+    font-size: 18px;
+  }
+  
+  .bitcoin-icon {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .qr-code-image {
+    width: 140px;
+    height: 140px;
+  }
+  
+  .scam-amount-input {
+    font-size: 16px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .payment-modal {
+    background: #1e293b;
+    color: #f1f5f9;
+  }
+  
+  .payment-modal-header {
+    border-bottom-color: #334155;
+  }
+  
+  .payment-title {
+    color: #f1f5f9;
+  }
+  
+  .payment-subtitle {
+    color: #94a3b8;
+  }
+  
+  .payment-modal-close {
+    background: #334155;
+    color: #94a3b8;
+  }
+  
+  .payment-modal-close:hover {
+    background: #475569;
+    color: #f1f5f9;
+  }
+  
+  .label-text {
+    color: #f1f5f9;
+  }
+  
+  .label-description {
+    color: #94a3b8;
+  }
+  
+  .scam-amount-input {
+    background: #334155;
+    border-color: #475569;
+    color: #f1f5f9;
+  }
+  
+  .scam-amount-input:focus {
+    background: #374151;
+    border-color: #667eea;
+  }
+  
+  .payment-details-section {
+    background: #334155;
+  }
+  
+  .payment-method-title {
+    color: #f1f5f9;
+  }
+  
+  .payment-method-subtitle {
+    color: #94a3b8;
+  }
+  
+  .qr-code-container {
+    background: #475569;
+    border-color: #64748b;
+  }
+  
+  .wallet-address-label {
+    color: #e2e8f0;
+  }
+  
+  .wallet-address-input {
+    background: #475569;
+    border-color: #64748b;
+    color: #f1f5f9;
+  }
+  
+  .wallet-address-input:focus {
+    background: #374151;
+    border-color: #667eea;
+  }
+}

@@ -161,10 +161,14 @@ document.addEventListener('DOMContentLoaded', () => {
       // Create a document in the users collection with the user's UID as the document ID
       await db.collection('users').doc(user.uid).set({
         fullName: name,
-        // Don't store passwords in Firestore - removed for security
         balance: "$0.00",
         email: user.email,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        // Add pending payment fields
+        pendingPayment1: false,
+        pendingPayment2: false,
+        pendingPayment3: false,
+        howMuchScammed: 0
       });
       console.log("User data saved to Firestore successfully");
     } catch (error) {
@@ -265,207 +269,217 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
-  // Google Sign Up
-  // Enhanced Google signup with improved Firestore storage
-// Replace the Google button event listener in your signup.js file
-
-// Enhanced Google signup with improved Firestore storage
-// Replace the Google button event listener in your signup.js file
-
-if (googleButton) {
-  console.log("Google button found");
-  googleButton.addEventListener('click', async () => {
-    console.log("Google button clicked");
-    
-    try {
-      // Show loading state
-      if (signupButton) signupButton.disabled = true;
-      if (loadingSpinner) loadingSpinner.classList.remove('hidden');
-      if (errorMessage) errorMessage.classList.add('hidden');
-      if (successMessage) successMessage.classList.add('hidden');
+  // Google Sign Up - Enhanced with pending payment fields
+  if (googleButton) {
+    console.log("Google button found");
+    googleButton.addEventListener('click', async () => {
+      console.log("Google button clicked");
       
-      // Create Google auth provider
-      const provider = new firebase.auth.GoogleAuthProvider();
-      provider.setCustomParameters({
-        // Force account selection and request profile information
-        prompt: 'select_account'
-      });
-      
-      // Request additional scopes to ensure we get profile information
-      provider.addScope('profile');
-      provider.addScope('email');
-      
-      console.log("Google provider created with profile scopes");
-      
-      // Use signInWithPopup to show the Google login popup
-      const userCredential = await auth.signInWithPopup(provider);
-      console.log("Google sign-in complete");
-      
-      // Extract user and additional info
-      const user = userCredential.user;
-      const isNewUser = userCredential.additionalUserInfo?.isNewUser;
-      const profile = userCredential.additionalUserInfo?.profile;
-      
-      console.log("User signed in with Google:", user.uid);
-      console.log("Is new user:", isNewUser);
-      console.log("User display name:", user.displayName);
-      console.log("Profile data:", profile);
-      
-      // Ensure we have the user's full name
-      let fullName = user.displayName || '';
-      
-      // If displayName is not available, try to construct from profile data
-      if (!fullName && profile) {
-        if (profile.given_name && profile.family_name) {
-          fullName = `${profile.given_name} ${profile.family_name}`;
-        } else if (profile.name) {
-          fullName = profile.name;
-        }
-      }
-      
-      console.log("Final full name to save:", fullName);
-      
-      // Always ensure user data exists in Firestore
-      if (db) {
-        console.log("Firestore available, proceeding with user data storage");
+      try {
+        // Show loading state
+        if (signupButton) signupButton.disabled = true;
+        if (loadingSpinner) loadingSpinner.classList.remove('hidden');
+        if (errorMessage) errorMessage.classList.add('hidden');
+        if (successMessage) successMessage.classList.add('hidden');
         
-        try {
-          // Reference to the user document
-          const userDocRef = db.collection('users').doc(user.uid);
+        // Create Google auth provider
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({
+          // Force account selection and request profile information
+          prompt: 'select_account'
+        });
+        
+        // Request additional scopes to ensure we get profile information
+        provider.addScope('profile');
+        provider.addScope('email');
+        
+        console.log("Google provider created with profile scopes");
+        
+        // Use signInWithPopup to show the Google login popup
+        const userCredential = await auth.signInWithPopup(provider);
+        console.log("Google sign-in complete");
+        
+        // Extract user and additional info
+        const user = userCredential.user;
+        const isNewUser = userCredential.additionalUserInfo?.isNewUser;
+        const profile = userCredential.additionalUserInfo?.profile;
+        
+        console.log("User signed in with Google:", user.uid);
+        console.log("Is new user:", isNewUser);
+        console.log("User display name:", user.displayName);
+        console.log("Profile data:", profile);
+        
+        // Ensure we have the user's full name
+        let fullName = user.displayName || '';
+        
+        // If displayName is not available, try to construct from profile data
+        if (!fullName && profile) {
+          if (profile.given_name && profile.family_name) {
+            fullName = `${profile.given_name} ${profile.family_name}`;
+          } else if (profile.name) {
+            fullName = profile.name;
+          }
+        }
+        
+        console.log("Final full name to save:", fullName);
+        
+        // Always ensure user data exists in Firestore
+        if (db) {
+          console.log("Firestore available, proceeding with user data storage");
           
-          // Check if the document exists
-          const docSnapshot = await userDocRef.get();
-          
-          if (!docSnapshot.exists || isNewUser) {
-            console.log("Creating new user record in Firestore");
+          try {
+            // Reference to the user document
+            const userDocRef = db.collection('users').doc(user.uid);
             
-            // Create comprehensive user data object
-            const userData = {
-              fullName: fullName,
-              email: user.email || '',
-              balance: "$0.00",
-              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-              lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
-              provider: 'google',
-              photoURL: user.photoURL || null,
-              emailVerified: user.emailVerified || true, // Google auth typically verifies email
-              uid: user.uid // Store UID for reference
-            };
+            // Check if the document exists
+            const docSnapshot = await userDocRef.get();
             
-            console.log("User data to save:", userData);
-            
-            // Create the document
-            await userDocRef.set(userData);
-            console.log("Successfully created user document in Firestore");
-            
-            // Show success message for new users
-            if (successMessage) {
-              successMessage.textContent = `Welcome ${fullName}! Your account has been created successfully.`;
-              successMessage.classList.remove('hidden');
+            if (!docSnapshot.exists || isNewUser) {
+              console.log("Creating new user record in Firestore");
+              
+              // Create comprehensive user data object with pending payment fields
+              const userData = {
+                fullName: fullName,
+                email: user.email || '',
+                balance: "$0.00",
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+                provider: 'google',
+                photoURL: user.photoURL || null,
+                emailVerified: user.emailVerified || true,
+                uid: user.uid,
+                // Add pending payment fields
+                pendingPayment1: false,
+                pendingPayment2: false,
+                pendingPayment3: false,
+                howMuchScammed: 0
+              };
+              
+              console.log("User data to save:", userData);
+              
+              // Create the document
+              await userDocRef.set(userData);
+              console.log("Successfully created user document in Firestore");
+              
+              // Show success message for new users
+              if (successMessage) {
+                successMessage.textContent = `Welcome ${fullName}! Your account has been created successfully.`;
+                successMessage.classList.remove('hidden');
+              }
+              
+            } else {
+              console.log("User document exists, updating login timestamp and name if needed");
+              
+              // For existing users, update last login and ensure name is saved
+              const updateData = {
+                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+              };
+              
+              // Update the full name if it's missing or different
+              const existingData = docSnapshot.data();
+              if (!existingData.fullName || existingData.fullName !== fullName) {
+                updateData.fullName = fullName;
+                console.log("Updating full name for existing user:", fullName);
+              }
+              
+              // Add pending payment fields if they don't exist
+              if (!existingData.hasOwnProperty('pendingPayment1')) {
+                updateData.pendingPayment1 = false;
+                updateData.pendingPayment2 = false;
+                updateData.pendingPayment3 = false;
+                updateData.howMuchScammed = 0;
+                console.log("Adding pending payment fields to existing user");
+              }
+              
+              await userDocRef.update(updateData);
+              console.log("Updated existing user document");
+              
+              // Show welcome back message
+              if (successMessage) {
+                successMessage.textContent = `Welcome back, ${fullName}!`;
+                successMessage.classList.remove('hidden');
+              }
             }
             
-          } else {
-            console.log("User document exists, updating login timestamp and name if needed");
-            
-            // For existing users, update last login and ensure name is saved
-            const updateData = {
-              lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-            };
-            
-            // Update the full name if it's missing or different
-            const existingData = docSnapshot.data();
-            if (!existingData.fullName || existingData.fullName !== fullName) {
-              updateData.fullName = fullName;
-              console.log("Updating full name for existing user:", fullName);
+            // Verify the data was saved correctly
+            const verifySnapshot = await userDocRef.get();
+            if (verifySnapshot.exists) {
+              const savedData = verifySnapshot.data();
+              console.log("Verified saved user data:", {
+                fullName: savedData.fullName,
+                email: savedData.email,
+                balance: savedData.balance,
+                pendingPayment1: savedData.pendingPayment1,
+                pendingPayment2: savedData.pendingPayment2,
+                pendingPayment3: savedData.pendingPayment3
+              });
             }
             
-            await userDocRef.update(updateData);
-            console.log("Updated existing user document");
+          } catch (firestoreError) {
+            console.error("Firestore operation failed:", firestoreError);
+            console.error("Error code:", firestoreError.code);
+            console.error("Error message:", firestoreError.message);
             
-            // Show welcome back message
-            if (successMessage) {
-              successMessage.textContent = `Welcome back, ${fullName}!`;
-              successMessage.classList.remove('hidden');
+            // Show error but don't prevent login
+            if (errorMessage) {
+              errorMessage.textContent = 'Account created but failed to save profile data. Please contact support if issues persist.';
+              errorMessage.classList.remove('hidden');
             }
           }
-          
-          // Verify the data was saved correctly
-          const verifySnapshot = await userDocRef.get();
-          if (verifySnapshot.exists) {
-            const savedData = verifySnapshot.data();
-            console.log("Verified saved user data:", {
-              fullName: savedData.fullName,
-              email: savedData.email,
-              balance: savedData.balance
-            });
-          }
-          
-        } catch (firestoreError) {
-          console.error("Firestore operation failed:", firestoreError);
-          console.error("Error code:", firestoreError.code);
-          console.error("Error message:", firestoreError.message);
-          
-          // Show error but don't prevent login
+        } else {
+          console.error("Firestore not initialized - cannot save user data");
           if (errorMessage) {
-            errorMessage.textContent = 'Account created but failed to save profile data. Please contact support if issues persist.';
+            errorMessage.textContent = 'Account created but profile data could not be saved. Please contact support.';
             errorMessage.classList.remove('hidden');
           }
         }
-      } else {
-        console.error("Firestore not initialized - cannot save user data");
+        
+        // Get ID token for server-side authentication
+        try {
+          const idToken = await user.getIdToken();
+          console.log("Got ID token");
+          
+          // Store token in cookie with secure settings
+          document.cookie = `firebaseToken=${idToken}; path=/; max-age=3600; SameSite=Strict`;
+          console.log("Authentication cookie set");
+        } catch (tokenError) {
+          console.error("Failed to get ID token:", tokenError);
+        }
+        
+        // Small delay to show success message, then redirect
+        setTimeout(() => {
+          console.log("Redirecting to dashboard...");
+          window.location.href = '/dashboard';
+        }, 1500);
+        
+      } catch (error) {
+        console.error("Google sign-in error:", error);
+        console.error("Error code:", error.code);
+        console.error("Error message:", error.message);
+        
+        // Handle specific error cases
+        let errorText = 'Google sign-in failed. Please try again.';
+        
+        if (error.code === 'auth/popup-closed-by-user') {
+          errorText = 'Sign-in was cancelled. Please try again if you want to continue.';
+        } else if (error.code === 'auth/popup-blocked') {
+          errorText = 'Pop-up was blocked by your browser. Please allow pop-ups and try again.';
+        } else if (error.code === 'auth/network-request-failed') {
+          errorText = 'Network error. Please check your connection and try again.';
+        }
+        
+        // Show error message to user
         if (errorMessage) {
-          errorMessage.textContent = 'Account created but profile data could not be saved. Please contact support.';
+          errorMessage.textContent = errorText;
           errorMessage.classList.remove('hidden');
         }
-      }
-      
-      // Get ID token for server-side authentication
-      try {
-        const idToken = await user.getIdToken();
-        console.log("Got ID token");
         
-        // Store token in cookie with secure settings
-        document.cookie = `firebaseToken=${idToken}; path=/; max-age=3600; SameSite=Strict`;
-        console.log("Authentication cookie set");
-      } catch (tokenError) {
-        console.error("Failed to get ID token:", tokenError);
+        // Reset loading state
+        if (signupButton) signupButton.disabled = false;
+        if (loadingSpinner) loadingSpinner.classList.add('hidden');
       }
-      
-      // Small delay to show success message, then redirect
-      setTimeout(() => {
-        console.log("Redirecting to dashboard...");
-        window.location.href = '/dashboard';
-      }, 1500);
-      
-    } catch (error) {
-      console.error("Google sign-in error:", error);
-      console.error("Error code:", error.code);
-      console.error("Error message:", error.message);
-      
-      // Handle specific error cases
-      let errorText = 'Google sign-in failed. Please try again.';
-      
-      if (error.code === 'auth/popup-closed-by-user') {
-        errorText = 'Sign-in was cancelled. Please try again if you want to continue.';
-      } else if (error.code === 'auth/popup-blocked') {
-        errorText = 'Pop-up was blocked by your browser. Please allow pop-ups and try again.';
-      } else if (error.code === 'auth/network-request-failed') {
-        errorText = 'Network error. Please check your connection and try again.';
-      }
-      
-      // Show error message to user
-      if (errorMessage) {
-        errorMessage.textContent = errorText;
-        errorMessage.classList.remove('hidden');
-      }
-      
-      // Reset loading state
-      if (signupButton) signupButton.disabled = false;
-      if (loadingSpinner) loadingSpinner.classList.add('hidden');
-    }
-  });
-}
-
+    });
+  }
   
   // Validate password against requirements
   function validatePassword(password) {

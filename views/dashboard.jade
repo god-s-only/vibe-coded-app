@@ -8,7 +8,7 @@ block content
         .header-content
           .user-info
             .avatar-container
-              img#user-avatar.user-avatar(src="/images/default-avatar.png" alt="User Avatar")
+              img#user-avatar.user-avatar(src="/images/avatar.png" alt="User Avatar")
               .status-indicator.online
             .user-details
               h1#user-name.user-name Welcome back
@@ -17,7 +17,7 @@ block content
             button.btn.btn-secondary#logout-btn
               i.icon.icon-logout
               span Logout
-    
+
     // Main Dashboard Content
     main.dashboard-main
       .container
@@ -43,7 +43,7 @@ block content
                 button.btn.btn-outline.deposit-btn#deposit-btn
                   i.icon.icon-upload
                   span Deposit
-        
+
         // Quick Actions Section
         .quick-actions
           h2.section-title Quick Actions
@@ -56,7 +56,7 @@ block content
                 p View all your transactions
               .action-arrow
                 i.icon.icon-chevron-right
-            
+
             .action-card
               .action-icon
                 i.icon.icon-settings
@@ -65,7 +65,7 @@ block content
                 p Manage your profile
               .action-arrow
                 i.icon.icon-chevron-right
-            
+
             .action-card
               .action-icon
                 i.icon.icon-help
@@ -74,43 +74,54 @@ block content
                 p Get help and support
               .action-arrow
                 i.icon.icon-chevron-right
-        
-        // Recent Activity
+
+        // Crypto Prices Section (Updated Styling)
         .recent-activity
           h2.section-title Crypto Prices
           .activity-list
             .activity-item
               .activity-icon.success
-                i.icon.icon-check
+                span.crypto-symbol ₿
               .activity-content
-                .activity-title 
-                .activity-description 
-                .activity-time 
-              .activity-amount 
-            
+                .activity-title Bitcoin
+                .activity-description BTC
+                .activity-time
+              .activity-amount
+                span#bitcoin-price $0.00
+                br
+                span#bitcoin-change.crypto-change +0.00%
+
             .activity-item
               .activity-icon.pending
-                i.icon.icon-clock
+                span.crypto-symbol Ξ
               .activity-content
-                .activity-title 
-                .activity-description 
-                .activity-time 
-              .activity-amount 
-            
+                .activity-title Ethereum
+                .activity-description ETH
+                .activity-time
+              .activity-amount
+                span#ethereum-price $0.00
+                br
+                span#ethereum-change.crypto-change +0.00%
+
             .activity-item
               .activity-icon.info
-                i.icon.icon-info
+                span.crypto-symbol Ð
               .activity-content
-                .activity-title 
-                .activity-description 
+                .activity-title Dogecoin
+                .activity-description DOGE
                 .activity-time
-    
+              .activity-amount
+                span#dogecoin-price $0.00
+                br
+                span#dogecoin-change.crypto-change +0.00%
+
     // Loading Overlay
-    .loading-overlay#loading-overlay
-      .loading-spinner
-        .spinner
-      .loading-text Loading your dashboard...
-    
+    #loading-overlay.loading-overlay
+      .loading-content
+        .loading-spinner
+          .spinner
+        .loading-text Loading your dashboard...
+
     // Withdraw Modal
     .modal-overlay#withdraw-modal
       .modal
@@ -134,8 +145,124 @@ block content
               button.btn.btn-secondary(type="button" data-dismiss="modal") Cancel
               button.btn.btn-primary(type="submit") Confirm Withdrawal
 
+block styles
+  style.
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    .loading-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .loading-content {
+      text-align: center;
+      color: white;
+    }
+    .loading-spinner {
+      margin-bottom: 20px;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid #fff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .loading-text {
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .activity-list {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+      overflow: hidden;
+    }
+    .activity-item {
+      display: flex;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      transition: background-color 0.3s ease;
+    }
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+    .activity-item:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .activity-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+      font-weight: bold;
+    }
+    .activity-icon.success {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+    }
+    .activity-icon.pending {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+    }
+    .activity-icon.info {
+      background: rgba(59, 130, 246, 0.2);
+      color: #3b82f6;
+    }
+    .activity-content {
+      flex: 1;
+    }
+    .activity-title {
+      font-weight: 600;
+      color: white;
+      margin-bottom: 0.25rem;
+    }
+    .activity-description {
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 0.25rem;
+    }
+    .activity-time {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    .activity-amount {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #fff;
+    }
+    .crypto-change.positive {
+      color: #28a745;
+    }
+    .crypto-change.negative {
+      color: #dc3545;
+    }
+
 block scripts
-  // Firebase Client SDK - IMPORTANT: Include Firestore!
   script(src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js")
   script(src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js")
   script(src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js")
