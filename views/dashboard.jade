@@ -34,8 +34,13 @@ block content
                   span.sr-only Toggle Balance
             .balance-content
               .balance-display
-                span.currency-symbol $
-                span#balance-amount.balance-amount(data-balance="0.00") ••••••
+                .primary-balance
+                  span.currency-symbol $
+                  span#balance-amount.balance-amount(data-balance="0.00") ••••••
+                .btc-balance
+                  img.btc-icon(src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" alt="Bitcoin")
+                  span#btc-balance.btc-amount(data-btc-balance="0.00000000") ••••••••
+                  span.btc-label BTC
               .balance-actions
                 button.btn.btn-primary.withdraw-btn#withdraw-btn
                   i.icon.icon-download
@@ -75,17 +80,18 @@ block content
               .action-arrow
                 i.icon.icon-chevron-right
 
-        // Crypto Prices Section (Updated Styling)
+        // Crypto Prices Section (Updated with Real Icons)
         .recent-activity
           h2.section-title Crypto Prices
           .activity-list
             .activity-item
               .activity-icon.success
-                span.crypto-symbol ₿
+                img.crypto-icon(src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/32/icon/btc.png" alt="bitcoin" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'")
+                div(style="display:none; width:32px; height:32px; border-radius:50%; background:#f7931a; align-items:center; justify-content:center; font-weight:bold; font-size:14px; color:white;") ₿
               .activity-content
                 .activity-title Bitcoin
                 .activity-description BTC
-                .activity-time
+                .activity-time Live Price
               .activity-amount
                 span#bitcoin-price $0.00
                 br
@@ -93,11 +99,12 @@ block content
 
             .activity-item
               .activity-icon.pending
-                span.crypto-symbol Ξ
+                img.crypto-icon(src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/32/icon/eth.png" alt="ethereum" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'")
+                div(style="display:none; width:32px; height:32px; border-radius:50%; background:#627eea; align-items:center; justify-content:center; font-weight:bold; font-size:14px; color:white;") Ξ
               .activity-content
                 .activity-title Ethereum
                 .activity-description ETH
-                .activity-time
+                .activity-time Live Price
               .activity-amount
                 span#ethereum-price $0.00
                 br
@@ -105,11 +112,12 @@ block content
 
             .activity-item
               .activity-icon.info
-                span.crypto-symbol Ð
+                img.crypto-icon(src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/32/icon/doge.png" alt="dogecoin" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'")
+                div(style="display:none; width:32px; height:32px; border-radius:50%; background:#c2a633; align-items:center; justify-content:center; font-weight:bold; font-size:14px; color:white;") Ð
               .activity-content
                 .activity-title Dogecoin
                 .activity-description DOGE
-                .activity-time
+                .activity-time Live Price
               .activity-amount
                 span#dogecoin-price $0.00
                 br
@@ -131,16 +139,17 @@ block content
             i.icon.icon-x
         .modal-content
           form#withdraw-form
-            .form-group
-              label(for="withdraw-amount") Amount
-              .input-wrapper
-                span.currency-symbol $
-                input#withdraw-amount.form-input(type="number" placeholder="0.00" min="1" step="0.01" required)
-            .form-group
-              label(for="withdraw-method") Withdrawal Method
-              select#withdraw-method.form-select(required)
-                option(value="") Select method
-                option(value="crypto") Cryptocurrency
+      .form-group
+        label(for="withdraw-amount") Amount
+        .input-wrapper
+          span.currency-symbol $
+          input#withdraw-amount.form-input(type="number" name="withdraw-amount" placeholder="0.00" min="1" step="0.01" required)
+      .form-group
+        label(for="withdraw-method") Withdrawal Method
+        select#withdraw-method.form-select(name="withdraw-method" required)
+          option(value="") Select method
+          option(value="crypto") Cryptocurrency
+
             .form-actions
               button.btn.btn-secondary(type="button" data-dismiss="modal") Cancel
               button.btn.btn-primary(type="submit") Confirm Withdrawal
@@ -191,6 +200,59 @@ block styles
       font-weight: 500;
     }
 
+    /* Balance Display Styles */
+    .balance-display {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .primary-balance {
+      display: flex;
+      align-items: baseline;
+      gap: 0.25rem;
+    }
+    .currency-symbol {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.8);
+    }
+    .balance-amount {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: white;
+    }
+    .btc-balance {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0.7;
+      font-size: 0.9rem;
+    }
+    .btc-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+    }
+    .btc-amount {
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.8);
+      font-family: 'Monaco', 'Menlo', monospace;
+    }
+    .btc-label {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    /* Crypto Icons Styles */
+    .crypto-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
     .activity-list {
       background: rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(10px);
@@ -212,26 +274,28 @@ block styles
       background: rgba(255, 255, 255, 0.03);
     }
     .activity-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 0.5rem;
+      width: 48px;
+      height: 48px;
+      border-radius: 0.75rem;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-right: 1rem;
       font-weight: bold;
+      position: relative;
+      overflow: hidden;
     }
     .activity-icon.success {
-      background: rgba(16, 185, 129, 0.2);
-      color: #10b981;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
     }
     .activity-icon.pending {
-      background: rgba(245, 158, 11, 0.2);
-      color: #f59e0b;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.2);
     }
     .activity-icon.info {
-      background: rgba(59, 130, 246, 0.2);
-      color: #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
     }
     .activity-content {
       flex: 1;
@@ -240,11 +304,13 @@ block styles
       font-weight: 600;
       color: white;
       margin-bottom: 0.25rem;
+      font-size: 1.1rem;
     }
     .activity-description {
       font-size: 0.875rem;
       color: rgba(255, 255, 255, 0.7);
       margin-bottom: 0.25rem;
+      font-weight: 500;
     }
     .activity-time {
       font-size: 0.75rem;
@@ -254,12 +320,13 @@ block styles
       font-weight: 600;
       font-size: 1rem;
       color: #fff;
+      text-align: right;
     }
     .crypto-change.positive {
-      color: #28a745;
+      color: #10b981;
     }
     .crypto-change.negative {
-      color: #dc3545;
+      color: #ef4444;
     }
 
 block scripts

