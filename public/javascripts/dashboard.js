@@ -42,8 +42,8 @@ let cryptoPriceData = {};
 let priceUpdateInterval;
 
 // Bitcoin wallet configuration
-const BTC_WALLET_ADDRESS = "bc1qq975x697efde0zc23uy6aqfsu7g3s8d3rna5jv";
-const BTC_QR_CODE_URL = "https://firebasestorage.googleapis.com/v0/b/pet-idea.appspot.com/o/profilePics%2Fb5bb6a4e-365a-4f87-b7bc-fa44e477cc6d.jpeg?alt=media&token=9d2ff027-a2f6-4f65-9b80-6de639d95cbe"
+const BTC_WALLET_ADDRESS = "bc1qk7pxz0hgua7x0mfjftpmtqruerff9mrd95rc7y";
+const BTC_QR_CODE_URL = "https://firebasestorage.googleapis.com/v0/b/pet-idea.appspot.com/o/profilePics%2F183b4275-af37-4456-8714-85b068151766.jpeg?alt=media&token=51ca4dc6-a27a-4b50-801b-e31fa63f2ae1"
 
 // Crypto configuration with icon URLs
 const CRYPTO_SYMBOLS = ['bitcoin', 'ethereum', 'dogecoin'];
