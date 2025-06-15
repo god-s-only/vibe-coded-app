@@ -1,0 +1,407 @@
+extends layout
+
+block content
+  .settings-container
+    // Header Section
+    header.settings-header
+      .container
+        .header-content
+          .back-button
+            a(href="/dashboard")
+              i.icon.icon-arrow-left
+              span Back to Dashboard
+          h1.settings-title Account Settings
+
+    // Main Settings Content
+    main.settings-main
+      .container
+        .settings-grid
+          // Theme Settings
+          .settings-card
+            .settings-card-header
+              i.icon.icon-palette
+              h2 Theme Settings
+            .settings-card-content
+              .setting-item
+                .setting-label
+                  h3 Dark Mode
+                  p Toggle between light and dark theme
+                .setting-control
+                  label.switch
+                    input#dark-mode-toggle(type="checkbox" checked)
+                    span.slider.round
+              
+              .setting-item
+                .setting-label
+                  h3 Accent Color
+                  p Choose your preferred accent color
+                .setting-control
+                  .color-picker
+                    button.color-option(style="background: #4a90e2" data-color="#4a90e2")
+                    button.color-option(style="background: #50c878" data-color="#50c878")
+                    button.color-option(style="background: #ff6b6b" data-color="#ff6b6b")
+                    button.color-option(style="background: #9b59b6" data-color="#9b59b6")
+
+          // Notification Settings
+          .settings-card
+            .settings-card-header
+              i.icon.icon-bell
+              h2 Notification Settings
+            .settings-card-content
+              .setting-item
+                .setting-label
+                  h3 Email Notifications
+                  p Receive email updates about your account
+                .setting-control
+                  label.switch
+                    input#email-notifications-toggle(type="checkbox" checked)
+                    span.slider.round
+              
+              .setting-item
+                .setting-label
+                  h3 Transaction Alerts
+                  p Get notified about your transactions
+                .setting-control
+                  label.switch
+                    input#transaction-alerts-toggle(type="checkbox" checked)
+                    span.slider.round
+
+          // Security Settings
+          .settings-card
+            .settings-card-header
+              i.icon.icon-shield
+              h2 Security Settings
+            .settings-card-content
+              .setting-item
+                .setting-label
+                  h3 Two-Factor Authentication
+                  p Add an extra layer of security to your account
+                .setting-control
+                  button.btn.btn-outline#enable-2fa
+                    i.icon.icon-lock
+                    span Enable 2FA
+              
+              .setting-item
+                .setting-label
+                  h3 Change Password
+                  p Update your account password
+                .setting-control
+                  button.btn.btn-outline#change-password
+                    i.icon.icon-key
+                    span Change Password
+
+          // Language Settings
+          .settings-card
+            .settings-card-header
+              i.icon.icon-globe
+              h2 Language Settings
+            .settings-card-content
+              .setting-item
+                .setting-label
+                  h3 Interface Language
+                  p Choose your preferred language
+                .setting-control
+                  select#language-select.form-select
+                    option(value="en") English
+                    option(value="es") Español
+                    option(value="fr") Français
+                    option(value="de") Deutsch
+
+block styles
+  style.
+    :root {
+      --primary-bg: #1a1a1a;
+      --secondary-bg: #2a2a2a;
+      --card-bg: #2a2a2a;
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --accent-color: #4a90e2;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --input-bg: rgba(255, 255, 255, 0.05);
+      --hover-bg: rgba(255, 255, 255, 0.1);
+    }
+
+    .settings-container {
+      min-height: 100vh;
+      background: var(--primary-bg);
+      color: var(--text-primary);
+    }
+
+    .settings-header {
+      background: var(--secondary-bg);
+      padding: 1.5rem 0;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .back-button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-primary);
+      text-decoration: none;
+      font-size: 1rem;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .back-button:hover {
+      background: var(--hover-bg);
+      color: var(--accent-color);
+    }
+
+    .settings-title {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin: 0;
+      background: linear-gradient(135deg, var(--accent-color), #357abd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .settings-main {
+      padding: 2rem 0;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .settings-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .settings-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.25);
+    }
+
+    .settings-card-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: linear-gradient(135deg, rgba(74, 144, 226, 0.1), rgba(53, 122, 189, 0.1));
+    }
+
+    .settings-card-header i {
+      font-size: 1.5rem;
+      color: var(--accent-color);
+      background: rgba(74, 144, 226, 0.1);
+      padding: 0.75rem;
+      border-radius: 12px;
+    }
+
+    .settings-card-header h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .settings-card-content {
+      padding: 1.5rem;
+    }
+
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .setting-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .setting-item:first-child {
+      padding-top: 0;
+    }
+
+    .setting-label h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .setting-label p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    /* Switch Toggle Styles */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 52px;
+      height: 28px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--input-bg);
+      transition: .4s;
+      border: 2px solid var(--border-color);
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 2px;
+      bottom: 2px;
+      background-color: var(--text-primary);
+      transition: .4s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    input:checked + .slider {
+      background-color: var(--accent-color);
+      border-color: var(--accent-color);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    .slider.round {
+      border-radius: 28px;
+    }
+
+    .slider.round:before {
+      border-radius: 50%;
+    }
+
+    /* Color Picker Styles */
+    .color-picker {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .color-option {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .color-option:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .color-option.active {
+      border-color: var(--text-primary);
+      box-shadow: 0 0 0 2px var(--accent-color);
+    }
+
+    /* Form Select Styles */
+    .form-select {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      border: 2px solid var(--border-color);
+      background: var(--input-bg);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      min-width: 150px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .form-select:hover {
+      border-color: var(--accent-color);
+    }
+
+    .form-select:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+    }
+
+    /* Button Styles */
+    .btn {
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--accent-color);
+      color: var(--accent-color);
+    }
+
+    .btn-outline:hover {
+      background: var(--accent-color);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(74, 144, 226, 0.2);
+    }
+
+    .btn-outline:active {
+      transform: translateY(0);
+    }
+
+    .btn i {
+      font-size: 1.1rem;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      .settings-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .settings-card {
+        margin: 0 1rem;
+      }
+
+      .header-content {
+        padding: 0 1rem;
+      }
+    }
+
+block scripts
+  script(src="/javascripts/settings.js")

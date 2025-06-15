@@ -1,36 +1,49 @@
 /* Modern Professional CSS for sign-up page */
 :root {
-  --primary-color: #000000;
-  --primary-hover: #002fff;
-  --secondary-color: #3a0ca3;
-  --primary-light: #3b82f6;
-  --accent-color: #8b5cf6;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #64748b;
+  --primary-color: #0a0a0a;
+  --primary-hover: #111111;
+  --secondary-color: #0d1117;
+  --primary-light: #161b22;
+  --accent-color: #4f46e5;
+  --accent-hover: #4338ca;
+  --signin-color: #ec4899;
+  --signin-hover: #db2777;
+  --text-primary: #ffffff;
+  --text-secondary: #e2e8f0;
+  --text-muted: #cbd5e1;
   --text-white: #ffffff;
-  --background-primary: #ffffff;
-  --background-secondary: #f8fafc;
-  --background-accent: #f1f5f9;
+  --text-highlight: #93c5fd;
+  --text-terms: #ffffff;
+  --text-terms-hover: #93c5fd;
+  --background-primary: #0a0a0a;
+  --background-secondary: #111111;
+  --background-accent: #0d1117;
+  --background-mobile: #0a0a0a;
   --success-color: #10b981;
-  --success-light: #d1fae5;
-  --error-color: #ef4444;
-  --error-light: #fee2e2;
-  --warning-color: #f59e0b;
-  --warning-light: #fef3c7;
-  --border-color: #e2e8f0;
-  --border-light: #f1f5f9;
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --success-light: #81c784;
+  --error-color: #f44336;
+  --error-light: #e57373;
+  --warning-color: #ff9800;
+  --warning-light: #ffb74d;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-light: rgba(255, 255, 255, 0.05);
+  --border-mobile: rgba(255, 255, 255, 0.1);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  --shadow-mobile: 0 2px 8px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-xl: 16px;
+  --radius-mobile: 12px;
   --transition-fast: 0.15s ease-out;
   --transition-normal: 0.3s ease-out;
   --transition-slow: 0.5s ease-out;
+  --spring-transition: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 * {
@@ -43,11 +56,39 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   line-height: 1.6;
   color: var(--text-primary);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, rgba(120, 255, 214, 0.1) 0%, transparent 50%),
+    linear-gradient(135deg, #0a0a0a 0%, #111111 25%, #0d1117 50%, #161b22 75%, #0a0a0a 100%);
   min-height: 100vh;
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 98px,
+      rgba(255, 255, 255, 0.02) 100px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 98px,
+      rgba(255, 255, 255, 0.02) 100px
+    );
+  pointer-events: none;
+  z-index: 1;
 }
 
 .page-wrapper {
@@ -90,7 +131,7 @@ body {
 /* Left panel - Enhanced with modern gradient */
 .signin-left-panel {
   flex: 1;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 50%, var(--accent-color) 100%);
+  background: linear-gradient(135deg, #0a0a0a 0%, #111111 25%, #0d1117 50%, #161b22 75%, #0a0a0a 100%);
   color: var(--text-white);
   padding: 48px;
   display: flex;
@@ -142,11 +183,13 @@ body {
   font-weight: 800;
   line-height: 1.2;
   letter-spacing: -0.02em;
+  color: var(--text-white);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .welcome-text p {
   font-size: 18px;
-  opacity: 0.9;
+  color: var(--text-secondary);
   margin-bottom: 40px;
   line-height: 1.6;
 }
@@ -182,45 +225,54 @@ body {
   margin-right: 16px;
   font-size: 16px;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-highlight);
 }
 
 .feature-text {
-  font-size: 17px;
+  color: var(--text-secondary);
+  font-size: 16px;
   font-weight: 500;
 }
 
-/* Mobile header for professional branding */
+/* Enhanced Mobile Header */
 .mobile-header {
   display: none;
   width: 100%;
-  padding: 24px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border-light);
+  padding: max(var(--safe-area-top), 16px) 20px 16px;
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-mobile);
   position: fixed;
   top: 0;
   left: 0;
   z-index: 1000;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-mobile);
+  transition: all var(--transition-normal);
 }
 
 .mobile-branding {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   max-width: 400px;
   margin: 0 auto;
+  animation: slideDown 0.6s var(--spring-transition);
 }
 
 .mobile-brand-logo {
   height: 36px;
   margin-right: 14px;
+  transition: transform var(--transition-fast);
+  filter: brightness(0) invert(1);
 }
 
 .mobile-brand-name {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 800;
-  color: var(--text-primary);
+  color: var(--text-white);
   letter-spacing: -0.01em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Right panel - Modern form design */
@@ -318,11 +370,10 @@ body {
 
 .form-group label {
   display: block;
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--text-primary);
-  margin-bottom: 10px;
-  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 14px;
 }
 
 .input-container {
@@ -348,17 +399,22 @@ body {
   background-color: var(--background-primary);
   transition: all var(--transition-normal);
   font-weight: 500;
+  color: var(--text-white);
+}
+
+.input-container input::placeholder {
+  color: var(--text-muted);
 }
 
 .input-container input:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-  background-color: var(--background-secondary);
+  border-color: var(--accent-color);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
 .input-container input:focus + .input-icon {
-  color: var(--primary-color);
+  color: var(--accent-color);
 }
 
 .toggle-password {
@@ -375,7 +431,7 @@ body {
 }
 
 .toggle-password:hover {
-  color: var(--primary-color);
+  color: var(--accent-color);
   background-color: var(--background-accent);
 }
 
@@ -393,7 +449,7 @@ body {
 .requirements-title {
   font-weight: 700;
   margin-bottom: 12px;
-  color: var(--text-primary);
+  color: var(--text-secondary);
   font-size: 15px;
 }
 
@@ -433,86 +489,78 @@ body {
 
 /* Enhanced form agreement */
 .form-agreement {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: 32px;
-  padding: 20px;
-  background-color: var(--background-secondary);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-light);
-}
-
-.form-agreement input {
-  margin-top: 2px;
-  margin-right: 12px;
-  transform: scale(1.2);
-  accent-color: var(--primary-color);
-}
-
-.form-agreement label {
   font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.5;
+  color: var(--text-terms);
+  text-align: center;
+  margin-top: 24px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.form-agreement span {
+  color: var(--text-terms);
+  transition: color var(--transition-fast);
+}
+
+.form-agreement span:hover {
+  color: var(--text-terms-hover);
+  cursor: pointer;
+}
+
+.form-agreement .terms-text {
+  color: var(--text-terms);
   font-weight: 500;
 }
 
-.form-agreement a {
-  color: var(--primary-color);
-  text-decoration: none;
-  font-weight: 600;
-  transition: all var(--transition-fast);
+.form-agreement .privacy-text {
+  color: var(--text-terms);
+  font-weight: 500;
 }
 
-.form-agreement a:hover {
-  text-decoration: underline;
-  color: var(--primary-hover);
+.form-agreement .and-text {
+  color: var(--text-muted);
+  margin: 0 4px;
 }
 
 /* Enhanced primary button */
 .primary-button {
   width: 100%;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-  color: var(--text-white);
-  font-size: 17px;
-  font-weight: 700;
-  padding: 18px 24px;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+  color: white;
   border: none;
   border-radius: var(--radius-md);
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition-normal);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  overflow: hidden;
-  letter-spacing: -0.01em;
-  box-shadow: var(--shadow-md);
-}
-
-.primary-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left var(--transition-slow);
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
 }
 
 .primary-button:hover {
-  background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary-color) 100%);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
 }
 
-.primary-button:hover::before {
-  left: 100%;
+.secondary-button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--signin-color) 0%, var(--signin-hover) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
 }
 
-.primary-button:active {
-  transform: translateY(0);
-  box-shadow: var(--shadow-md);
+.secondary-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(236, 72, 153, 0.4);
 }
 
 .spinner {
@@ -542,7 +590,7 @@ body {
 
 .divider-text {
   padding: 0 20px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-size: 14px;
   font-weight: 600;
   background-color: var(--background-primary);
@@ -560,49 +608,27 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px 24px;
-  border: 2px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background-color: var(--background-primary);
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition-normal);
-  position: relative;
-  overflow: hidden;
-}
-
-.social-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
   width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.02), transparent);
-  transition: left var(--transition-normal);
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 16px;
+  font-weight: 500;
+  transition: all var(--transition-fast);
 }
 
 .social-button:hover {
-  background-color: var(--background-secondary);
-  border-color: var(--primary-color);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-white);
+  border-color: var(--border-light);
 }
 
-.social-button:hover::before {
-  left: 100%;
-}
-
-.social-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
+.social-button img {
+  width: 24px;
+  height: 24px;
   margin-right: 12px;
-  font-weight: 700;
-  font-size: 18px;
 }
 
 .google-button .social-icon {
@@ -627,7 +653,7 @@ body {
 }
 
 .signup-link a {
-  color: var(--primary-color);
+  color: var(--text-highlight);
   text-decoration: none;
   font-weight: 700;
   transition: all var(--transition-fast);
@@ -635,7 +661,8 @@ body {
 
 .signup-link a:hover {
   text-decoration: underline;
-  color: var(--primary-hover);
+  color: var(--text-white);
+  background-color: rgba(147, 197, 253, 0.1);
 }
 
 /* Responsive design - Mobile first approach */
@@ -701,11 +728,13 @@ body {
 
 @media (max-width: 768px) {
   body {
-    background: var(--background-primary);
+    background: var(--background-mobile);
+    font-size: 16px; /* Prevent zoom on input focus */
   }
   
   .page-wrapper {
     align-items: flex-start;
+    padding: 0;
   }
   
   .mobile-header {
@@ -717,15 +746,18 @@ body {
   }
   
   .signin-container {
-    margin-top: 88px;
-    background: var(--background-primary);
+    margin-top: calc(72px + var(--safe-area-top));
+    background: var(--background-mobile);
+    min-height: calc(100vh - 72px - var(--safe-area-top));
   }
   
   .signin-card {
-    padding: 32px 24px;
-    max-width: 480px;
-    margin: 0 auto;
-    min-height: calc(100vh - 88px);
+    padding: 32px 24px calc(32px + var(--safe-area-bottom));
+    max-width: 100%;
+    margin: 0;
+    min-height: calc(100vh - 72px - var(--safe-area-top));
+    background: var(--background-mobile);
+    animation: fadeInUp 0.6s var(--spring-transition);
   }
   
   .signin-header {
@@ -825,5 +857,65 @@ body {
   .primary-button {
     padding: 14px 20px;
     font-size: 15px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-primary: #ffffff;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --text-highlight: #60a5fa;
+    --text-terms: #e2e8f0;
+    --text-terms-hover: #60a5fa;
+    --background-primary: #0a0a0a;
+    --background-secondary: #111111;
+    --background-accent: #0d1117;
+    --background-mobile: #0a0a0a;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --border-light: rgba(255, 255, 255, 0.05);
+    --border-mobile: rgba(255, 255, 255, 0.1);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    --shadow-mobile: 0 2px 8px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  }
+  
+  body {
+    background: 
+      radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, rgba(120, 255, 214, 0.1) 0%, transparent 50%),
+      linear-gradient(135deg, #0a0a0a 0%, #111111 25%, #0d1117 50%, #161b22 75%, #0a0a0a 100%);
+  }
+  
+  .mobile-header {
+    background: rgba(10, 10, 10, 0.95);
+    border-bottom: 1px solid var(--border-mobile);
+  }
+  
+  .mobile-brand-name {
+    color: var(--text-white);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .signin-container {
+    background-color: var(--background-primary);
+    border: 1px solid var(--border-color);
+  }
+  
+  .form-agreement {
+    background-color: var(--background-secondary);
+  }
+  
+  .social-button {
+    background-color: var(--background-primary);
+    border-color: var(--border-color);
+  }
+  
+  .social-button:hover {
+    background-color: var(--background-secondary);
   }
 }

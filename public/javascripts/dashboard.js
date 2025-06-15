@@ -33,6 +33,119 @@ const modalClose = document.getElementById('modal-close');
 const withdrawForm = document.getElementById('withdraw-form');
 const logoutBtn = document.getElementById('logout-btn');
 const userAvatar = document.getElementById('user-avatar');
+const supportModal = document.getElementById('support-modal');
+const supportModalClose = document.getElementById('support-modal-close');
+const supportForm = document.getElementById('support-form');
+
+// Default avatar placeholder URL
+const DEFAULT_AVATAR_URL = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+
+// Function to update user avatar
+function updateUserAvatar(user) {
+  if (!userAvatar) return;
+  
+  console.log('Updating avatar for user:', user);
+  console.log('Photo URL:', user.photoURL);
+  
+  // Check if user has Google provider data
+  const googleProvider = user.providerData.find(provider => provider.providerId === 'google.com');
+  console.log('Google provider data:', googleProvider);
+  
+  if (googleProvider && googleProvider.photoURL) {
+    // Use Google photo URL
+    console.log('Using Google photo URL:', googleProvider.photoURL);
+    userAvatar.src = googleProvider.photoURL;
+  } else if (user.photoURL) {
+    // Fallback to user's photoURL
+    console.log('Using user photo URL:', user.photoURL);
+    userAvatar.src = user.photoURL;
+  } else {
+    // Use default avatar
+    console.log('Using default avatar');
+    userAvatar.src = DEFAULT_AVATAR_URL;
+  }
+  
+  // Add error handling for avatar loading
+  userAvatar.onerror = (error) => {
+    console.error('Error loading avatar:', error);
+    userAvatar.src = DEFAULT_AVATAR_URL;
+  };
+}
+
+// Add event listener for transaction history action card
+document.addEventListener('DOMContentLoaded', () => {
+  const transactionHistoryCard = document.querySelector('.action-card:first-child');
+  if (transactionHistoryCard) {
+    transactionHistoryCard.addEventListener('click', () => {
+      alert('No transactions yet');
+    });
+  }
+
+  // Add event listener for settings card
+  const settingsCard = document.querySelector('.action-card:nth-child(2)');
+  if (settingsCard) {
+    settingsCard.addEventListener('click', () => {
+      window.location.href = '/settings';
+    });
+  }
+
+  // Add event listener for support card
+  const supportCard = document.querySelector('.action-card:last-child');
+  if (supportCard) {
+    supportCard.addEventListener('click', () => {
+      supportModal.classList.add('active');
+    });
+  }
+
+  // Close support modal
+  if (supportModalClose) {
+    supportModalClose.addEventListener('click', () => {
+      supportModal.classList.remove('active');
+    });
+  }
+
+  // Handle support form submission
+  if (supportForm) {
+    supportForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const message = document.getElementById('support-message').value;
+      const userEmail = currentUser?.email || 'No email provided';
+      
+      try {
+        showLoading();
+        
+        const response = await fetch('/api/support', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message,
+            userEmail,
+            userName: currentUser?.displayName || 'Anonymous User'
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to send support message');
+        }
+
+        // Clear form and close modal
+        supportForm.reset();
+        supportModal.classList.remove('active');
+        
+        // Show success message
+        alert('Your message has been sent successfully. We will get back to you soon!');
+      } catch (error) {
+        console.error('Error sending support message:', error);
+        alert('Failed to send message. Please try again later.');
+      } finally {
+        hideLoading();
+      }
+    });
+  }
+});
 
 let balanceVisible = true;
 let currentUser = null;
@@ -73,6 +186,9 @@ auth.onAuthStateChanged(async (user) => {
   if (!user) return window.location.href = '/signin';
 
   currentUser = user;
+  console.log('Auth state changed - User:', user);
+  console.log('User photo URL:', user.photoURL);
+  console.log('User provider data:', user.providerData);
 
   try {
     await loadUserData(user);
@@ -92,14 +208,14 @@ auth.onAuthStateChanged(async (user) => {
 async function loadUserData(user) {
   try {
     console.log('Loading user data for:', user.uid);
+    console.log('User provider data:', user.providerData);
     
     // Update user info in header
     if (userName) userName.textContent = `Welcome back, ${user.displayName || 'User'}`;
     if (userEmail) userEmail.textContent = user.email;
     
-    if (user.photoURL && userAvatar) {
-      userAvatar.src = user.photoURL;
-    }
+    // Update avatar
+    updateUserAvatar(user);
     
     // Load user data from Firestore
     console.log('Fetching user document from Firestore...');
@@ -342,18 +458,24 @@ if (withdrawBtn) {
   });
 }
 
-// Balance toggle functionality
+// Add balance toggle event listener
 if (balanceToggle) {
   balanceToggle.addEventListener('click', () => {
     balanceVisible = !balanceVisible;
-    const balanceValue = balanceAmount ? balanceAmount.getAttribute('data-balance') : '0.00';
+    const balanceAmount = document.getElementById('balance-amount');
+    const btcBalance = document.getElementById('btc-balance');
+    const eyeIcon = balanceToggle.querySelector('i.icon-eye');
     
     if (balanceVisible) {
-      if (balanceAmount) balanceAmount.textContent = balanceValue;
-      balanceToggle.textContent = '👁️';
+      balanceAmount.textContent = userBalance;
+      btcBalance.textContent = (parseFloat(userBalance) / cryptoPriceData.bitcoin?.usd || 0).toFixed(8);
+      eyeIcon.classList.remove('icon-eye-off');
+      eyeIcon.classList.add('icon-eye');
     } else {
-      if (balanceAmount) balanceAmount.textContent = '••••••';
-      balanceToggle.textContent = '🙈';
+      balanceAmount.textContent = '••••••';
+      btcBalance.textContent = '••••••••';
+      eyeIcon.classList.remove('icon-eye');
+      eyeIcon.classList.add('icon-eye-off');
     }
   });
 }

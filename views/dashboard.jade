@@ -154,6 +154,29 @@ block content
               button.btn.btn-secondary(type="button" data-dismiss="modal") Cancel
               button.btn.btn-primary(type="submit") Confirm Withdrawal
 
+    // Support Modal
+    .modal-overlay#support-modal
+      .modal.support-modal
+        .modal-header
+          h3 Contact Support
+          button.modal-close#support-modal-close
+            i.icon.icon-x
+        .modal-content
+          form#support-form
+            .form-group
+              label(for="support-message") How can we help you?
+              textarea#support-message.form-input(
+                name="support-message"
+                placeholder="Please describe your issue or question..."
+                rows="5"
+                maxlength="500"
+                required
+              )
+            .form-actions
+              button.btn.btn-primary(type="submit")
+                i.icon.icon-send
+                span Submit
+
 block styles
   style.
     .loading-overlay {
@@ -211,16 +234,21 @@ block styles
       display: flex;
       align-items: baseline;
       gap: 0.25rem;
+      line-height: 1;
     }
     .currency-symbol {
-      font-size: 1.5rem;
+      font-size: 2rem;
       font-weight: 600;
       color: rgba(255, 255, 255, 0.8);
+      line-height: 1;
+      margin-top: 0.2rem;
     }
     .balance-amount {
       font-size: 2.5rem;
       font-weight: 700;
       color: white;
+      line-height: 1;
+      font-family: 'Monaco', 'Menlo', monospace;
     }
     .btc-balance {
       display: flex;
@@ -327,6 +355,70 @@ block styles
     }
     .crypto-change.negative {
       color: #ef4444;
+    }
+
+    /* Support Modal Styles */
+    .support-modal {
+      max-width: 500px;
+      width: 90%;
+    }
+    
+    .support-modal .modal-content {
+      padding: 1.5rem;
+    }
+    
+    .support-modal textarea.form-input {
+      width: 100%;
+      min-height: 120px;
+      padding: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      font-size: 1rem;
+      line-height: 1.5;
+      resize: vertical;
+      transition: all 0.3s ease;
+    }
+    
+    .support-modal textarea.form-input:focus {
+      border-color: #4a90e2;
+      background: rgba(255, 255, 255, 0.08);
+      outline: none;
+    }
+    
+    .support-modal .form-actions {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    .support-modal .btn-primary {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+      border: none;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .support-modal .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(74, 144, 226, 0.2);
+    }
+    
+    .support-modal .btn-primary:active {
+      transform: translateY(0);
+    }
+    
+    .support-modal .icon-send {
+      font-size: 1.1rem;
     }
 
 block scripts
