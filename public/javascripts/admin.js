@@ -5,7 +5,6 @@ const serviceAccount = require("./hacking-app/fir-demo-app-f3342-firebase-admins
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://fir-demo-app-f3342-default-rtdb.firebaseio.com"
   });
   console.log('Firebase Admin SDK initialized');
 } else {

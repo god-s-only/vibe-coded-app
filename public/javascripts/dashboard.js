@@ -1,16 +1,14 @@
 // CLIENT-SIDE ONLY - Remove all Firebase Admin code!
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCnj0IErUeGXEGl72I8495ZS1RHeuOBwfY",
-  authDomain: "fir-demo-app-f3342.firebaseapp.com",
-  databaseURL: "https://fir-demo-app-f3342-default-rtdb.firebaseio.com",
-  projectId: "fir-demo-app-f3342",
-  storageBucket: "fir-demo-app-f3342.firebasestorage.app",
-  messagingSenderId: "690323727261",
-  appId: "1:690323727261:web:4bdeea8a182e62cd4e8574",
-  measurementId: "G-BXYG86T6S0"
+  apiKey: "AIzaSyD5M_N2iv1bn4iDb_GqH-m9OS9Uo46pS5E",
+  authDomain: "cyberhatch02.firebaseapp.com",
+  projectId: "cyberhatch02",
+  storageBucket: "cyberhatch02.firebasestorage.app",
+  messagingSenderId: "871387273716",
+  appId: "1:871387273716:web:0df10f4c61d38154efc1a1",
+  measurementId: "G-T14ZTLG2Z2"
 };
-
 
 // Initialize Firebase CLIENT SDK
 if (!firebase.apps.length) {
