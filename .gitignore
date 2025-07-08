@@ -1,3 +1,8 @@
-node_modules
-hacking-app/.env
-hacking-app/fir-demo-app-f3342-firebase-adminsdk-vqzaf-de277b67d5.json
+# Node modules
+node_modules/
+
+# Environment files
+.env
+
+# Firebase service account key
+config/serviceAccountKey.json
