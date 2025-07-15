@@ -36,28 +36,26 @@ block content
           .form-group
             label(for="email") Email Address
             .input-container
-              span.input-icon 📧
               input#email(type="email" placeholder="your@email.com" required)
           
           .form-group
             label(for="password") Password
             .input-container
-              span.input-icon 🔒
               input#password(type="password" placeholder="••••••••" required)
-              button.toggle-password(type="button" tabindex="-1") 👁️
+             
           
         
           
           button#signin-button.primary-button(type="submit")
             span.button-text Sign In
-            span#loading-spinner.spinner.hidden ◌
+            span#loading-spinner.spinner.hidden
         
         .divider
           span.divider-text or
         
         .social-signin
           button.social-button.google-button(type="button")
-            img.brand-logo(src="/images/google.png" alt="App Logo")
+            img.brand-logo(src="/images/google.png" alt="Google Logo")
             span Continue with Google
     
         

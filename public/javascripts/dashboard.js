@@ -179,6 +179,35 @@ const CRYPTO_DISPLAY = {
 // Show loading immediately
 showLoading();
 
+// Add snackbar HTML to the page if not present
+function showWelcomeSnackbar(displayName) {
+  let snackbar = document.getElementById('welcome-snackbar');
+  if (!snackbar) {
+    snackbar = document.createElement('div');
+    snackbar.id = 'welcome-snackbar';
+    snackbar.style.position = 'fixed';
+    snackbar.style.top = '32px';
+    snackbar.style.left = '50%';
+    snackbar.style.transform = 'translateX(-50%)';
+    snackbar.style.background = '#27ae60';
+    snackbar.style.color = '#fff';
+    snackbar.style.padding = '1rem 2.5rem';
+    snackbar.style.borderRadius = '8px';
+    snackbar.style.fontSize = '1.1rem';
+    snackbar.style.fontWeight = '600';
+    snackbar.style.boxShadow = '0 4px 24px rgba(39,174,96,0.18)';
+    snackbar.style.zIndex = '9999';
+    snackbar.style.opacity = '0';
+    snackbar.style.transition = 'opacity 0.3s';
+    document.body.appendChild(snackbar);
+  }
+  snackbar.textContent = `Welcome Back, ${displayName || 'User'}!`;
+  snackbar.style.opacity = '1';
+  setTimeout(() => {
+    snackbar.style.opacity = '0';
+  }, 3500);
+}
+
 // Auth state listener
 auth.onAuthStateChanged(async (user) => {
   if (!user) return window.location.href = '/signin';
@@ -187,6 +216,9 @@ auth.onAuthStateChanged(async (user) => {
   console.log('Auth state changed - User:', user);
   console.log('User photo URL:', user.photoURL);
   console.log('User provider data:', user.providerData);
+
+  // Show welcome snackbar
+  showWelcomeSnackbar(user.displayName);
 
   try {
     await loadUserData(user);
