@@ -143,6 +143,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  const depositBtn = document.getElementById('deposit-btn');
+  if (depositBtn) {
+    depositBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      createDepositModal();
+    });
+  }
 });
 
 let balanceVisible = true;
@@ -928,6 +936,226 @@ async function handlePaymentComplete(step) {
         </svg>
       </span>
       I have completed the payment
+    `;
+  }
+}
+
+// Create deposit modal function
+function createDepositModal() {
+  // Remove existing modal if any
+  const existingModal = document.getElementById('deposit-modal');
+  if (existingModal) {
+    existingModal.remove();
+  }
+
+  // Create modal HTML
+  const modalHTML = `
+    <div class="deposit-modal-overlay" id="deposit-modal">
+      <div class="deposit-modal">
+        <div class="deposit-modal-header">
+          <div class="deposit-header-content">
+            <div class="deposit-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v20m0-20l7 7m-7-7l-7 7"/>
+              </svg>
+            </div>
+            <div class="deposit-title-section">
+              <h3 class="deposit-title">Deposit Funds</h3>
+              <p class="deposit-subtitle">Add money to your account</p>
+            </div>
+          </div>
+          <button class="deposit-modal-close" id="deposit-modal-close">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="deposit-modal-content">
+          <div class="deposit-amount-section">
+            <label for="deposit-amount" class="deposit-amount-label">
+              <span class="label-text">Deposit Amount</span>
+              <span class="label-description">Enter the amount you want to deposit</span>
+            </label>
+            <div class="deposit-amount-input-wrapper">
+              <span class="currency-symbol">$</span>
+              <input type="number" id="deposit-amount" class="deposit-amount-input" placeholder="0.00" min="1" step="0.01" required>
+            </div>
+          </div>
+          
+          <div class="deposit-method-section">
+            <h4 class="deposit-method-title">Payment Method</h4>
+            <div class="payment-methods">
+              <div class="payment-method-option active" data-method="bitcoin">
+                <div class="payment-method-icon">
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <circle cx="16" cy="16" r="16" fill="#F7931A"/>
+                    <path d="M23.189 14.02c.314-2.096-1.283-3.223-3.465-3.975l.708-2.84-1.728-.43-.69 2.765c-.454-.113-.92-.22-1.385-.326l.695-2.783L15.596 6l-.708 2.839c-.376-.086-.746-.17-1.104-.257l.002-.009-2.384-.595-.46 1.846s1.283.294 1.256.312c.7.175.826.638.805 1.006l-.806 3.235c.048.012.11.03.18.057l-.181-.045-1.13 4.532c-.086.212-.303.531-.793.41.018.025-1.256-.313-1.256-.313L8.53 19.833l2.25.561c.418.105.828.215 1.231.318l-.715 2.872 1.728.43.708-2.84c.472.127.93.245 1.378.357l-.706 2.828 1.728.43.715-2.866c2.948.558 5.164.333 6.097-2.333.752-2.146-.037-3.385-1.588-4.192 1.13-.26 1.98-1.003 2.207-2.538z" fill="white"/>
+                  </svg>
+                </div>
+                <div class="payment-method-info">
+                  <span class="payment-method-name">Bitcoin</span>
+                  <span class="payment-method-desc">BTC</span>
+                </div>
+                <div class="payment-method-check">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="deposit-details-section" id="bitcoin-details">
+            <div class="qr-code-section">
+              <div class="qr-code-container">
+                <img src="${BTC_QR_CODE_URL}" alt="Bitcoin QR Code" class="qr-code-image">
+              </div>
+            </div>
+            
+            <div class="wallet-address-section">
+              <label class="wallet-address-label">Bitcoin Wallet Address</label>
+              <div class="wallet-address-container">
+                <input type="text" value="${BTC_WALLET_ADDRESS}" class="wallet-address-input" readonly>
+                <button class="copy-address-btn" onclick="copyDepositAddress()">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4 2a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2V2zm2-1a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1V2a1 1 0 00-1-1H6zM2 5a1 1 0 100-2 1 1 0 000 2zm-2 9a2 2 0 012-2h2a1 1 0 010 2H2a1 1 0 01-1-1v-7a1 1 0 012 0v6a1 1 0 001 1h8a1 1 0 010 2H2z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <div class="deposit-instructions">
+              <div class="instruction-item">
+                <span class="instruction-number">1</span>
+                <span class="instruction-text">Send the exact amount to the wallet address above</span>
+              </div>
+              <div class="instruction-item">
+                <span class="instruction-number">2</span>
+                <span class="instruction-text">Wait for network confirmation (usually 10-60 minutes)</span>
+              </div>
+              <div class="instruction-item">
+                <span class="instruction-number">3</span>
+                <span class="instruction-text">Your balance will be updated automatically</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="deposit-actions">
+            <button class="deposit-complete-btn" id="deposit-complete-btn" onclick="handleDepositComplete()">
+              <span class="button-icon">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </span>
+              I have sent the deposit
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Add modal to DOM
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+  
+  // Add event listeners
+  const modal = document.getElementById('deposit-modal');
+  const closeBtn = document.getElementById('deposit-modal-close');
+  
+  // Show modal with animation
+  setTimeout(() => {
+    modal.classList.add('active');
+  }, 10);
+  
+  // Close modal event
+  closeBtn.addEventListener('click', () => {
+    closeDepositModal();
+  });
+  
+  // Click outside to close
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeDepositModal();
+    }
+  });
+}
+
+// Close deposit modal
+function closeDepositModal() {
+  const modal = document.getElementById('deposit-modal');
+  if (modal) {
+    modal.classList.remove('active');
+    setTimeout(() => {
+      modal.remove();
+    }, 300);
+  }
+}
+
+// Copy deposit wallet address to clipboard
+function copyDepositAddress() {
+  const addressInput = document.querySelector('#deposit-modal .wallet-address-input');
+  if (addressInput) {
+    addressInput.select();
+    document.execCommand('copy');
+    
+    // Show feedback
+    const copyBtn = document.querySelector('#deposit-modal .copy-address-btn');
+    const originalHTML = copyBtn.innerHTML;
+    copyBtn.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path fill-rule="evenodd" d="M13.854 3.646a.5.5 0 010 .708l-7 7a.5.5 0 01-.708 0l-3.5-3.5a.5.5 0 11.708-.708L6.5 10.293l6.646-6.647a.5.5 0 01.708 0z"/>
+      </svg>
+    `;
+    
+    setTimeout(() => {
+      copyBtn.innerHTML = originalHTML;
+    }, 2000);
+  }
+}
+
+// Handle deposit completion
+async function handleDepositComplete() {
+  const completeBtn = document.getElementById('deposit-complete-btn');
+  const amountInput = document.getElementById('deposit-amount');
+  
+  // Validate amount
+  if (!amountInput || !amountInput.value || parseFloat(amountInput.value) <= 0) {
+    alert('Please enter a valid deposit amount');
+    return;
+  }
+  
+  try {
+    // Show loading state
+    completeBtn.disabled = true;
+    completeBtn.innerHTML = `
+      <span class="button-spinner">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10 3a7 7 0 100 14 7 7 0 000-14zM2 10a8 8 0 1116 0 8 8 0 01-16 0z" opacity="0.25"/>
+          <path d="M10 2a8 8 0 018 8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+      </span>
+      Processing...`;
+
+    // Here you would typically verify the transaction on the blockchain
+    // For now, we'll just show a confirmation message
+    
+    setTimeout(() => {
+      closeDepositModal();
+      showPaymentSnackbar('Deposit submitted successfully! It will be processed once confirmed on the blockchain.');
+    }, 1500);
+    
+  } catch (error) {
+    console.error('Error handling deposit completion:', error);
+    alert('Error processing deposit. Please try again.');
+    completeBtn.disabled = false;
+    completeBtn.innerHTML = `
+      <span class="button-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+        </svg>
+      </span>
+      I have sent the deposit
     `;
   }
 }
