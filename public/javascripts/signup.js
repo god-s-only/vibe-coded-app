@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Create a document in the users collection with the user's UID as the document ID
       await db.collection('users').doc(user.uid).set({
         fullName: name,
-        balance: "$0.00",
+        balance: "0.00",
         email: user.email,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         // Add pending payment fields

