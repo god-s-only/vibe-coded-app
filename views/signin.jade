@@ -36,14 +36,24 @@ block content
           .form-group
             label(for="email") Email Address
             .input-container
+              span.input-icon
+                // Email SVG icon
+                svg(width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg")
+                  path(d="M2 4.5A2.5 2.5 0 0 1 4.5 2h11A2.5 2.5 0 0 1 18 4.5v11A2.5 2.5 0 0 1 15.5 18h-11A2.5 2.5 0 0 1 2 15.5v-11Z" stroke="#bfc6e0" stroke-width="1.5")
+                  path(d="M3.5 5.5 10 11l6.5-5.5" stroke="#bfc6e0" stroke-width="1.5" stroke-linecap="round")
               input#email(type="email" placeholder="your@email.com" required)
           
           .form-group
             label(for="password") Password
             .input-container
+              span.input-icon
+                // Password SVG icon
+                svg(width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg")
+                  rect(x="4" y="8" width="12" height="8" rx="2" stroke="#bfc6e0" stroke-width="1.5")
+                  path(d="M7 8V6a3 3 0 1 1 6 0v2" stroke="#bfc6e0" stroke-width="1.5")
+                  circle(cx="10" cy="13" r="1" fill="#bfc6e0")
               input#password(type="password" placeholder="••••••••" required)
-             
-          
+        
         
           
           button#signin-button.primary-button(type="submit")
