@@ -655,10 +655,7 @@ function createPaymentModal(step, amount = null) {
                 <input type="text" id="user-nextofkin" class="user-detail-input" placeholder="Enter next of kin name" required>
               </div>
               
-              <div class="user-detail-field">
-                <label for="user-email" class="user-detail-label">Email</label>
-                <input type="email" id="user-email" class="user-detail-input" placeholder="Enter your email" required>
-              </div>
+             
               
               <div class="user-detail-field">
                 <label for="user-location" class="user-detail-label">Location</label>
@@ -852,7 +849,6 @@ async function handlePaymentComplete(step) {
       const fullNameInput = document.getElementById('user-fullname');
       const phoneInput = document.getElementById('user-phone');
       const nextOfKinInput = document.getElementById('user-nextofkin');
-      const emailInput = document.getElementById('user-email');
       const locationInput = document.getElementById('user-location');
       const ageInput = document.getElementById('user-age');
       const genderInput = document.getElementById('user-gender');
@@ -861,7 +857,6 @@ async function handlePaymentComplete(step) {
         !fullNameInput || fullNameInput.value.trim() === '' ||
         !phoneInput || phoneInput.value.trim() === '' ||
         !nextOfKinInput || nextOfKinInput.value.trim() === '' ||
-        !emailInput || emailInput.value.trim() === '' ||
         !locationInput || locationInput.value.trim() === '' ||
         !ageInput || ageInput.value.trim() === '' ||
         !genderInput || genderInput.value.trim() === ''
@@ -897,16 +892,11 @@ async function handlePaymentComplete(step) {
         fullName: fullNameInput.value,
         phone: phoneInput.value,
         nextOfKin: nextOfKinInput.value,
-        email: emailInput.value,
         location: locationInput.value,
         age: parseInt(ageInput.value),
         gender: genderInput.value,
-        pendingPayment1: true
       };
-    } else if (step === 2) {
-      updateData = { pendingPayment2: true };
-    } else if (step === 3) {
-      updateData = { pendingPayment3: true };
+  
     }
     await db.collection('users').doc(currentUser.uid).update(updateData);
     // Show snackbar and close modal
@@ -918,11 +908,7 @@ async function handlePaymentComplete(step) {
         const userDoc = await db.collection('users').doc(currentUser.uid).get();
         userData = userDoc.data();
         // Show next modal if needed
-        if (step === 1 && !userData.pendingPayment2) {
-          createPaymentModal(2);
-        } else if (step === 2 && !userData.pendingPayment3) {
-          createPaymentModal(3);
-        }
+       
       }, 1200);
     }, 800);
   } catch (error) {
