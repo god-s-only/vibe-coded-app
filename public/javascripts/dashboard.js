@@ -578,7 +578,7 @@ function createPaymentModal(step, amount = null) {
   switch (step) {
     case 1:
       title = "Virus and Software Fee Required";
-      message = "Can't Withdraw at this point till the virus and software fee of $525";
+      message = "Can't Withdraw at this point till the virus and software fee of $525 is cleared";
       amountText = "$525";
       break;
     case 2:
